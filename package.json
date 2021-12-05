@@ -12,10 +12,6 @@
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "heroku-postbuild": "npm run build"
   },
-  "engines": {
-    "node": "10.15.2",
-    "npm": "6.14.4"
-  },
   "dependencies": {
     "@babel/preset-env": "^7.12.17",
     "@nuxtjs/axios": "^5.3.6",
