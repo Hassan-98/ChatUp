@@ -367,3 +367,5 @@ async function start () {
   })
 }
 start()
+
+console.log(process.env)
