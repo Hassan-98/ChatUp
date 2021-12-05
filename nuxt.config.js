@@ -50,6 +50,11 @@ module.exports = {
     '@nuxtjs/dotenv',
     '@nuxtjs/style-resources'
   ],
+  env: {
+    BASE_URL: process.env.BASE_URL,
+    AgoraAppID: process.env.AgoraAppID,
+    GOOGLE_AUTH_CLIENT_ID: process.env.GOOGLE_AUTH_CLIENT_ID
+  },
   axios: {
     baseURL: process.env.BASE_URL
   },
