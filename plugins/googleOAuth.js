@@ -8,4 +8,6 @@ const gauthOption = {
   prompt: 'select_account'
 }
 
+console.log(gauthOption);
+
 Vue.use(GAuth, gauthOption)
