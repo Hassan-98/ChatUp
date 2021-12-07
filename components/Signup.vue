@@ -1,70 +1,87 @@
 ﻿<template>
   <div class="sginup-page">
-    <Icon />
-    <form>
-      <h4>Join Us!</h4>
-      <label>Full Name</label>
-      <span class="input">
-        <i class="fas fa-user-alt" />
-        <input v-model="username" type="text" placeholder="Full Name">
-      </span>
-      <label>Email Address</label>
-      <span class="input">
-        <i class="fas fa-at" />
-        <input v-model="email" type="text" placeholder="Email Address">
-      </span>
-      <label>Password</label>
-      <span class="input">
-        <i class="fas fa-unlock-alt" />
-        <input v-model="password" type="password" placeholder="Password">
-      </span>
-      <label>Avatar</label>
-      <span class="input input-file">
-        <input type="file" class="avatarImg">
-      </span>
-      <button @click.prevent="signup">
-        Join Us!
-      </button>
-      <hr>
-      <p>Already a member?</p>
-      <nuxt-link to="login">
-        Sign In!
-      </nuxt-link>
-    </form>
+    <div class="signup-box">
+      <Icon />
+      <form>
+        <h4>Join Us!</h4>
+        <label>Full Name</label>
+        <span class="input">
+          <i class="fas fa-user-alt" />
+          <input v-model="username" type="text" placeholder="Full Name">
+        </span>
+        <label>Email Address</label>
+        <span class="input">
+          <i class="fas fa-at" />
+          <input v-model="email" type="text" placeholder="Email Address">
+        </span>
+        <label>Password</label>
+        <span class="input">
+          <i class="fas fa-unlock-alt" />
+          <input v-model="password" type="password" placeholder="Password">
+        </span>
+        <label>Avatar</label>
+        <span class="input input-file">
+          <input type="file" class="avatarImg">
+        </span>
+        <button @click.prevent="signup">
+          Join Us!
+        </button>
+        <hr>
+        <p>Already a member?</p>
+        <nuxt-link to="login">
+          Sign In!
+        </nuxt-link>
+      </form>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
   .sginup-page {
-    width: 45%;
-    margin: 0 auto;
+    width: 100%;
+    height: 100vh;
     display: flex;
     justify-content: center;
-    flex-direction: column;
     text-align: center;
-    @include xl {
-      width: 60%;
-    }
-    @include md {
-      width: 80%;
-    }
-    @include sm {
-      width: 95%;
+    align-items: center;
+    .signup-box {
+      width: 35%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      box-shadow: 1px 1px 10px rgba($color: #000000, $alpha: 0.1);
+      border-radius: 10px;
+      padding: 1.5rem 1rem 2.5rem;
+      margin: 0 auto;
       position: relative;
-      top: -50px;
+      @include xl {
+        width: 50%;
+      }
+      @include md {
+        width: 60%;
+      }
+      @include sm {
+        padding: 2rem 1rem 1.5rem;
+        width: 95%;
+        .icon {
+          top: -35px;
+          left: 65px;
+        }
+      }
+      @include xs {
+        .icon {
+          top: -25px;
+          left: 60px;
+        }
+      }
     }
     form {
       width: 100%;
       background: #fff;
-      box-shadow: 1px 1px 10px rgba($color: #000000, $alpha: 0.1);
-      border-radius: 10px;
-      padding: 3rem 2rem 2.5rem;
-      margin: 0 auto 1rem;
-      @include sm {
-        margin-top: -35px;
-      }
       h4 {
-        padding-top: 10px;
+        padding-top: 0px;
+        margin-top: 0px;
         margin-bottom: 25px;
         text-transform: uppercase;
         position: relative;
@@ -140,16 +157,17 @@
         }
         @include sm {
           width: 100%;
-          margin: 20px 0;
+          margin: 20px 0 0;
         }
       }
       a {
         font-size: 14px;
         text-decoration: none;
-        padding: 7px 15px;
+        padding: 5px 15px;
         color: #262626;
         border: 1px solid #ccc;
         margin: 5px;
+        border-radius: 5px;
         &:hover {
           background: #ccc;
         }
@@ -182,42 +200,39 @@ export default {
   methods: {
     async signup (e) {
       e.target.disabled = true;
-      e.target.innerHTML = this.$store.state.loadingElement
-      const { username, email, password } = this
-      const img = document.querySelector('.avatarImg').files[0]
+      e.target.innerHTML = this.$store.state.loadingElement;
+
+      const { username, email, password } = this;
+      const img = document.querySelector('.avatarImg').files[0];
+
       if (username === '' || email === '' || password === '' || img == false) {
         e.target.innerHTML = `Join Us!`;
         e.target.disabled = false;
-        return this.Toast.fire({
-          toast: true,
-          icon: 'error',
-          title: 'Oops! did you missed some fields ?'
-        })
-      } else {
-        var formdata = new FormData()
-        formdata.append('avatar', img)
-        formdata.set('username', username)
-        formdata.set('email', email)
-        formdata.set('password', password)
-        const res = await this.$axios.$post('/api/auth/signup', formdata)
-        if(res.err){
-          e.target.innerHTML = `Join Us!`;
-          e.target.disabled = false;
-          this.Toast.fire({
-            toast: true,
-            icon: 'error',
-            title: res.err
-          })
-        } else {
-          this.Toast.fire({
-            toast: true,
-            icon: 'success',
-            title: 'You are now one of us!'
-          }).then(() => {
-            this.$router.push("/login")
-          })
-        }
+        return this.Toast.fire({ icon: 'error', title: 'Oops! did you missed some fields ?' });
       }
+
+      var formdata = new FormData();
+      formdata.append('avatar', img);
+      formdata.set('username', username);
+      formdata.set('email', email);
+      formdata.set('password', password);
+
+      const {err} = await this.$axios.$post('/api/auth/signup', formdata);
+
+      if(err){
+        e.target.innerHTML = `Join Us!`;
+        e.target.disabled = false;
+        return this.Toast.fire({ icon: 'error', title: err })
+      }
+      
+      this.$router.push("/login");
+
+      this.Toast.fire({
+        icon: 'success',
+        title: 'You are now one of us!'
+      });
+        
+      
     }
   }
 }

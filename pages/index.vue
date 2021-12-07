@@ -128,35 +128,48 @@ export default {
     },
   },
   sockets: {
-    recieveMsg (msg) {
-      var ALLCHATS = this.$store.state.chats;
+    recieveMyMsg (msg) {
       var chatID = msg.chatId;
+      msg.user.photo = this.currentUser.photo;
+      this.$store.commit("addMessageToAChat", { chatID, msg, lastOneNotSeen: false });
+    },
+    recieveFriendMsg ({message, chatId}) {
+      var ALLCHATS = this.$store.state.chats;
       var lastOneNotSeen = true;
 
       ALLCHATS.forEach(chat => {
-        if (chat._id == chatID) {
-          var user = Object.values(chat.usersList).find(friend => friend._id == msg.userId);
-
-          msg.user = user;
-
+        if (chat._id == chatId) {
           // Check if the recieved message belongs to the opened chat
           if (this.$store.state.openedChatMode && this.$store.state.openedChat._id == chat._id) {
             // set last message to seen
             lastOneNotSeen = false;
-            // check if the current user not the sender of recieved message
-            if (msg.userId != this.currentUser._id) {
-              // remove unseen statue from the message on database
-              this.$socket.emit('removeUnSeen', {chatId: chatID, userId: this.currentUser._id});
 
-              // remove unseen statue from the message on ui
-              var index = msg.notSeen.findIndex(userID => userID == msg.userId);
-              if (index > -1) msg.notSeen.splice(index, 1);
-            }
+            // remove unseen statue from the message on database
+            this.$socket.emit('removeUnSeen', {chatId, userId: this.currentUser._id});
+
+            // remove unseen statue from the message on ui
+            var index = message.notSeen.findIndex(userID => userID == this.currentUser._id);
+            if (index > -1) message.notSeen.splice(index, 1);
           }
         }
       });
       
-      this.$store.commit("addMessageToAChat", { chatID, msg, lastOneNotSeen });
+      this.$store.commit("addMessageToAChat", { chatID: chatId, msg: message, lastOneNotSeen });
+    },
+    setMsgStatus ({tempId, message, chatID}) {
+      this.$store.commit("setMsgStatus", {message, tempId, chatID, sent: true});
+    },
+    setMsgError ({err, tempId, chatID}) {
+      this.$store.commit("setMsgStatus", {tempId, chatID, sent: "Not Sent"});
+
+      Swal.fire({
+        toast: true,
+        icon: 'error',
+        title: err
+      });
+    },
+    messageDeleted({msgId, chatId}){
+      this.$store.commit("deleteMessage", {msgId, chatId});
     },
     updateFriendStatus(friend){
       if (this.$store.state.chats.length) this.$store.commit("updateFriendStatus", friend);

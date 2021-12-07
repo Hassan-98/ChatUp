@@ -181,52 +181,6 @@ router.get('/chats/chat/:userId', authenticated, async (req, res) => {
   }
 })
 
-// Send Message To A Chat Room
-router.patch('/chats/:userId', authenticated, multer.array('chat_photos'), async (req, res) => {
-  try {
-    const chat_room = await ChatModel.findById(req.query.roomId)
-    if (!chat_room.usersList.includes(req.params.userId)) throw new Error("You Are Not Allowed To Send Messages To This Chat Room")
-
-    var msg = req.body.msg || ''
-
-    if (req.files){
-      msg = req.files.map(async file => {
-        const fileURL = await uploadToStorage(file);
-        return fileURL;
-      })
-    }
-
-    chat_room.messages.push({
-      user: req.params.userId, msg, sentAt: req.body.sentAt || Date.now()
-    })
-
-    const result = await chat_room.save()
-
-    res.send({ result })
-  } catch (e) {
-    res.send({ err: e.message })
-  }
-})
-
-// Delete A Message In A Chat Room
-router.delete('/chats/:userId', authenticated, async (req, res, next) => {
-  try {
-    const chat_room = await ChatModel.findById(req.query.roomId)
-    if (!chat_room.users.includes(req.params.userId)) throw new Error("You Are Not Allowed To Delete This Message")
-
-    var index = chat_room.messages.indexOf({ user: req.params.userId, msg: req.body.msg })
-    if (index == -1) throw new Error("Message Is Not Found Or Already Deleted")
-
-    chat_room.messages.splice(index, 1)
-
-    const result = await chat_room.save()
-
-    res.send({ result })
-  } catch (e) {
-    res.send({ err: e.message })
-  }
-})
-
 // Upload A File To A Chat Room
 router.post('/uploadFileToChat', authenticated, multer.single('file'), async (req, res) => {
   try {

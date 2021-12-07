@@ -123,7 +123,7 @@ export default {
       if (e.target.classList.contains('active')) {
         localStorage.setItem('darkMode', 'ON')
         document.documentElement.style.setProperty('--mc', '#BAC1C7')
-        document.documentElement.style.setProperty('--bg', '#193047')
+        document.documentElement.style.setProperty('--bg', '#1d354c')
         document.documentElement.style.setProperty('--wit', '#BAC1C7')
         document.documentElement.style.setProperty('--white', '#1d2f41')
         document.documentElement.style.setProperty('--text', '#BAC1C7')

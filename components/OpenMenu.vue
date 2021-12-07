@@ -98,12 +98,15 @@
         font-weight: bold;
         color: var(--mc);
         text-align: left;
+        @include sm {
+          margin: 0 0 10px;
+        }
       }
       .icons-bar {
         display: flex;
         justify-content: space-between;
         width: 100%;
-        padding: 5px;
+        padding: 0 5px;
         .head-icon {
           margin-top: 5px;
           margin-bottom: 5px;
@@ -115,7 +118,7 @@
             cursor: pointer;
             position: relative;
             @include sm {
-              font-size: 26px;
+              font-size: 22px;
             }
             &.notification {
               &.newRequests {
@@ -156,6 +159,9 @@
       }
       &:focus {
         border-color: var(--mc);
+      }
+      @include sm {
+        padding: 5px 10px;
       }
     }
     .allChats {

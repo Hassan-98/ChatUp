@@ -5,23 +5,24 @@
     </client-only>
     <div class="recording-modal">
       <div class="modal-content">
+        <i v-tooltip="'close'" class="fal fa-times close" @click="closeRecorder" />
         <h1><i class="fal fa-microphone-alt" /></h1>
         <p class="record-timer">
           {{ timer.minutes }} : {{ timer.seconds }} : {{ timer.milliseconds }}
         </p>
-        <button class="controlBTN start" @click="startRecording">
+        <button v-tooltip="'Start recording'" class="controlBTN start" @click="startRecording">
           <i class="fad fa-microphone-alt" />
         </button>
-        <button class="controlBTN stop" @click="stopRecording">
+        <button v-tooltip="'Stop recording'" class="controlBTN stop" @click="stopRecording">
           <i class="fad fa-stop" />
         </button>
         <div class="record-result">
           <hr>
           <audio src="" controls class="audio-records" />
-          <button class="controlBTN delete" disabled="disabled" @click="deleteRecord">
+          <button v-tooltip="'Delete record'" class="controlBTN delete" disabled="disabled" @click="deleteRecord">
             <i class="fad fa-trash" />
           </button>
-          <button class="controlBTN send" disabled="disabled" @click="sendRecord">
+          <button v-tooltip="'Send record'" class="controlBTN send" disabled="disabled" @click="sendRecord">
             <i class="fad fa-paper-plane" />
           </button>
         </div>
@@ -66,10 +67,15 @@
         <UploadingLoader v-if="isUploading" />
         <div v-for="message in chat.messages" :key="message._id" :class="{ me: message.user._id == currentUser._id, location: message.location, file: message.file, record: message.record, voiceCall: message.voiceCall, msg: message.msg.length > 0 }">
           <img :src="message.user.photo" alt="chat-img" @click="openProfile(message.user)">
+
           <div class="content">
             <!-- NORMAL MESSAGE -->
-            <p v-if="message.msg.length > 0">
+            <p v-if="message.msg.length > 0 && !message.deleted">
               {{ message.msg }}
+            </p>
+            <p v-if="message.msg.length > 0 && message.deleted" class="deleted">
+              <i class="far fa-times" />
+              Message Deleted
             </p>
             <!-- NORMAL MESSAGE -->
 
@@ -120,12 +126,12 @@
             <!-- RECORD MESSAGE -->
 
             <!-- MESSAGE MENU -->
-            <i v-if="message.msg.length > 0" class="fas fa-ellipsis-v" @click="openMsgMenu">
+            <i v-if="message.msg.length > 0 && !message.deleted" class="fas fa-ellipsis-v" @click="openMsgMenu">
               <ul class="options-menu">
                 <li @click="translateText($event, message.msg, currentUser.defaultLanguage)"><i class="fal fa-language" /> Translate</li>
                 <li @click="openReplayMsg(message.msg, message._id, message.user.username)"><i class="fal fa-reply" /> Reply</li>
                 <li @click="hearMsg($event, message)"><i class="fal fa-headphones-alt" /> Listen</li>
-                <li v-if="message.user._id == currentUser._id"><i class="fal fa-trash-alt" /> Delete</li>
+                <li v-if="message.user._id == currentUser._id" @click="deleteMsg(message._id)"><i class="fal fa-trash-alt" /> Delete</li>
               </ul>
             </i>
             <!-- MESSAGE MENU -->
@@ -228,6 +234,15 @@
         text-align: center;
         padding: 20px;
         border: none;
+        position: relative;
+        & > i {
+          position: absolute;
+          top: 10px;
+          right: 12px;
+          color: var(--mc);
+          text-shadow: none;
+          cursor: pointer;
+        }
         h1 {
           color: var(--mc);
         }
@@ -512,14 +527,23 @@
               font-family: 'Tajawal', sans-serif;
               margin: 0;
               display: inline-block;
-              max-width: 70%;
               font-size: 16px;
               background: #F4F7FC;
               color: #212529;
-              padding: 8px 15px;
+              padding: 6px 15px;
               border-radius: 15px;
               box-shadow: none;
               max-width: 350px;
+              &.deleted {
+                color: #999;
+                font-style: italic;
+                i {
+                  margin-right: 5px;
+                  position: relative;
+                  color: red;
+                  top: 1px;
+                }
+              }
               #text {
                   direction: rtl;
               }
@@ -531,9 +555,6 @@
                   content: 'a';
                   color: transparent;
                   position: absolute;
-              }
-              @include xs {
-                max-width: 60%;
               }
               img {
                 max-width: 100px;
@@ -919,6 +940,7 @@
         span {
           padding: 5px;
           font-weight: bold;
+          color: var(--mc);
         }
         p {
           border-radius: 3px;
@@ -951,7 +973,7 @@
         text-align: center;
         @include xs {
           height: 75px;
-          padding: 10px 5px;
+          padding: 13px 5px 7px;
         }
         textarea {
           direction: rtl;
@@ -990,8 +1012,8 @@
               }
             }
             @include sm {
-              padding: 7px;
-              margin: 0 5px 7px;
+              padding: 7px 0 7px 8px;
+              margin: 5px 0 7px 0;
               font-size: 20px;
             }
             @include xs {
@@ -1021,11 +1043,6 @@
           }
           @include xs {
             width: 28%;
-            i {
-              margin-bottom: 5px;
-              margin-left: 10px;
-              padding: 0;
-            }
           }
         }
         .additional-buttons-menu {
@@ -1109,7 +1126,6 @@ const Recorder = () => {
             mediaRecorder.addEventListener('stop', () => {
               const audioBlob = new Blob(audioChunks, {type: 'audio/mp3'})
               const audioUrl = URL.createObjectURL(audioBlob)
-              const audio = new Audio(audioUrl)
 
               resolve({ audioBlob, audioUrl })
             })
@@ -1135,7 +1151,6 @@ export default {
         seconds: "00",
         minutes: "00"
       },
-      peer: {},
       isUploading: false
     }
   },
@@ -1387,7 +1402,7 @@ export default {
       document.querySelector('.buttons-menu-btn').classList.remove('rotateIt')
       document.querySelector('.additional-buttons-menu').classList.remove('show')
 
-      const { msg, chat, currentUser, $socket, $store } = this;
+      const { msg, chat, currentUser, $socket } = this;
 
       var message = {};
 
@@ -1429,6 +1444,11 @@ export default {
       this.msg = '';
 
       document.querySelector('.msgArea').focus();
+    },
+    deleteMsg(msgId) {
+      const { chat: {_id: chatId}, currentUser: {_id: userId}, $socket } = this;
+
+      $socket.emit("deleteMessage", {msgId, chatId, userId});
     },
     goToLocation(location){
       var {lat, long} = location
@@ -1566,11 +1586,47 @@ export default {
       document.querySelector('.additional-buttons-menu').classList.toggle('show');
       this.hideEmoji();
     },
-    openRecorder (e) {
-      document.querySelector('.recording-modal').classList.toggle('show')
+    async openRecorder (e) {
+      document.querySelector('.recording-modal').classList.toggle('show');
+      
+      if (window.recorder) {
+        await window.recorder.stop();
+        window.stream?.getAudioTracks()[0].stop();
+        window.recorder = null;
+        
+        var resultElement = document.querySelector('.record-result');
+        resultElement.style.display = 'none';
+        document.querySelector(".controlBTN.stop").style.display = 'none';
+        document.querySelector(".controlBTN.start").style.display = 'block';
+
+        clearInterval(window.timer);
+        this.timer.milliseconds = '00';
+        this.timer.seconds = '00';
+        this.timer.minutes = '00';
+      }
+
       if (e.target.className !== 'fal fa-microphone-alt recorderIcon') {
         this.openButtonMenu()
       }
+    },
+    async closeRecorder() {
+      if (window.recorder) {
+        await window.recorder.stop();
+        window.stream?.getAudioTracks()[0].stop();
+        window.recorder = null;
+      }
+      
+      var resultElement = document.querySelector('.record-result');
+      resultElement.style.display = 'none';
+      document.querySelector(".controlBTN.stop").style.display = 'none';
+      document.querySelector(".controlBTN.start").style.display = 'block';
+
+      clearInterval(window.timer);
+      this.timer.milliseconds = '00';
+      this.timer.seconds = '00';
+      this.timer.minutes = '00';
+      
+      document.querySelector('.recording-modal').classList.remove('show');
     },
     startRecordingAudio () {
       return new Promise(async resolve => {
@@ -1580,7 +1636,7 @@ export default {
         resolve();
       })
     },
-    async startRecording(e){
+    async startRecording(){
       var eleSrc = document.querySelector('.record-result audio').src
       var splitted = eleSrc.split('/')
       var isThereSrc = splitted[splitted.length - 1]
@@ -1613,35 +1669,36 @@ export default {
       if (e.target.tagName == "I") {
         BUTTON = e.target.parentElement;
       }
-      document.querySelector(".controlBTN.stop").style.display = 'none'
-      document.querySelector('.record-result').style.display = 'block'
-      clearInterval(window.timer)
-      this.timer.milliseconds = '00'
-      this.timer.seconds = '00'
-      this.timer.minutes = '00'
+      document.querySelector(".controlBTN.stop").style.display = 'none';
+      document.querySelector('.record-result').style.display = 'block';
 
-      const {audioUrl, audioBlob} = await recorder.stop();
+      clearInterval(window.timer);
+      this.timer.milliseconds = '00';
+      this.timer.seconds = '00';
+      this.timer.minutes = '00';
+
+      const {audioUrl} = await recorder.stop();
       
       setTimeout(() => {
         window.stream.getAudioTracks()[0].stop();
-      }, 1000)
+        window.recorder = null;
+      }, 1000);
+
       document.querySelector('.record-result audio').src = audioUrl;
       Object.values(document.querySelectorAll('.record-result button')).forEach(btn => {
         btn.disabled = false
       })
     },
     async deleteRecord () {
-      var resultElement = document.querySelector('.record-result')
-      resultElement.style.display = 'none'
-      resultElement.querySelector('audio').src = ''
-      document.querySelector(".controlBTN.start").style.display = 'block'
-      setTimeout(() => {
-        window.stream.getAudioTracks()[0].stop();
-      }, 1000)
+      var resultElement = document.querySelector('.record-result');
+      resultElement.style.display = 'none';
+      document.querySelector(".controlBTN.start").style.display = 'block';
+      resultElement.querySelector('audio').src = '';
+      if (window.recorder) { window.recorder = null; };
     },
     async sendRecord () {
       /* Send Record Msg */
-      const { $axios, $socket, $store, currentUser, chat } = this;
+      const { $axios, $socket, currentUser, chat } = this;
 
       if (chat.usersList.other) {
 
@@ -1689,10 +1746,10 @@ export default {
 
       $socket.emit('msg', message);
 
+      if (window.recorder) { window.recorder = null; }
+
       // CLEAR AUDIO RECORDER
       document.querySelector('.record-result audio').src = '';
-      // Stop Microphone Audio Track
-      setTimeout(() => window.stream.getAudioTracks()[0].stop(), 1000);
 
       this.isUploading = false;
     },
@@ -1700,7 +1757,7 @@ export default {
       const { $store, $socket } = this;
 
       var idx = -1;
-      if (this.chat.usersList.other)  idx = this.currentUser.blockList.findIndex(user => user._id == chat.usersList.other._id);
+      if (this.chat.usersList.other) idx = this.currentUser.blockList.findIndex(user => user._id == chat.usersList.other._id);
       
       if (idx > -1) return Swal.fire({
         toast: true,
@@ -1763,20 +1820,11 @@ export default {
     }
   },
   sockets: {
-    recieveMsg (msg) {
+    recieveMyMsg (msg) {
       if (msg.chatId == this.chat._id) this.scrollDown();
     },
-    setMsgStatus (msgID) {
-      this.$store.commit("setMsgStatus", {msgID, chatID: this.chat._id, sent: true});
-    },
-    Error (err) {
-      this.$store.commit("setMsgStatus", {msgID: err.msgId, chatID: this.chat._id, sent: "Not Sent"});
-
-      Swal.fire({
-        toast: true,
-        icon: 'error',
-        title: err.err
-      });
+    recieveFriendMsg (msg) {
+      if (msg.chatId == this.chat._id) this.scrollDown();
     },
     isOnGoingCall ({ isOnGoingCall, callerUserID }) {
       const { $store, $socket } = this;

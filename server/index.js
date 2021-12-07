@@ -92,7 +92,7 @@ async function start () {
   /***********************************************=== ===**********************************************/
 
   const io = require('socket.io')(server);
-  const { setLastActive, getChatInBetween, saveMessage, getAllChatsId, getAllFriendsId, removeUnSeen, editGroup, checkPermissions } = require('./Utils/socketFunctions');
+  const { setLastActive, getChatInBetween, saveMessage, deleteMessage, getAllChatsId, getAllFriendsId, removeUnSeen, editGroup, checkPermissions } = require('./Utils/socketFunctions');
 
   io.on('connection', (socket) => {
     /*| The Connected User Object |*/
@@ -122,19 +122,33 @@ async function start () {
 
     /************** Sending A Message To A Chat **************/
     socket.on('msg', async (msg) => {
-      var fakeId = Math.floor(Math.random() * 1000000000000000)
-      const { allowed, ERROR } = await checkPermissions(msg.userId, msg.chatId)
+      const tempId = Math.floor(Math.random() * 1000000000000000);
+
+      const { allowed, ERROR } = await checkPermissions(msg.userId, msg.chatId);
+
       if (allowed && !ERROR) {
+        socket.emit('recieveMyMsg', { ...msg, sentAt: Date.now(), sent: false, _id: tempId, user: { _id: msg.userId } });
 
-        io.to(msg.chatId).emit('recieveMsg', { ...msg, sentAt: Date.now(), sent: false, _id: fakeId, user: { _id: msg.userId } });
+        const {err, message, usersList} = await saveMessage(msg, tempId);
 
-        var {err} = await saveMessage(msg);
+        if (err) return socket.emit('setMsgError', {err, tempId, chatID: msg.chatId});
 
-        if (err) return socket.emit('Error', {err, msgId: fakeId});
+        usersList.forEach(user => {
+          if (msg.userId != user) io.to(user + 'PERSONAL CHANNEL').emit('recieveFriendMsg', {message, chatId: msg.chatId});
+        });
 
-        socket.emit('setMsgStatus', fakeId);
+        socket.emit('setMsgStatus', {tempId, message, chatID: msg.chatId});
       }
     })
+
+    /************** Delete A Message From A Chat **************/
+    socket.on("deleteMessage", async ({msgId, chatId, userId}) => {
+      const {err} = await deleteMessage({msgId, chatId, userId});
+
+      if (err) return;
+
+      io.to(chatId).emit('messageDeleted', {msgId, chatId});
+    });
 
     /************** Start A Chat In The Friend's UI **************/
     socket.on('createChat', (chat) => {
@@ -347,11 +361,11 @@ async function start () {
 
           onGoingUserGroupCall.joinedUsersIDs.splice(index, 1);
 
+          await onGoingUserGroupCall.save();
+
           onGoingUserGroupCall.joinedUsersIDs.forEach(userID => {
             io.to(userID + 'PERSONAL CHANNEL').emit('removeAUserFromGroupCall', {removedUserID: connectedUser._id})
           });
-
-          await onGoingUserGroupCall.save();
         }
 
       }

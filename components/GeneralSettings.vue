@@ -108,6 +108,7 @@
           }
           @include sm {
             padding: 0rem;
+            font-size: 14px;
           }
         }
         span.input {
@@ -124,11 +125,15 @@
             padding: 7px 10px;
             margin: 0 0 5px;
             background: #f2f2f2;
-            border-radius: 0;
+            border-radius: 10px 0 0 10px;
             border: 2px solid #f2f2f2;
             border-right: 0;
             font-size: 25px;
             color: #aaa;
+            @include sm {
+              padding: 4px 8px;
+              font-size: 20px;
+            }
           }
           select {
             border: none;
@@ -141,13 +146,17 @@
             display: block;
             margin: 0 0 5px;
             width: 100%;
-            border-radius: 0;
+            border-radius: 0 10px 10px 0;
             border-left: 0;
             &:focus {
               border-color: #f2f2f2;
               & i {
                 border-color: var(--mc2);
               }
+            }
+            @include sm {
+              font-size: 14px;
+              padding: 4px 12px;
             }
           }
           textarea {
@@ -156,7 +165,7 @@
             display: block;
             margin: 0 0 5px;
             width: 100%;
-            border-radius: 0;
+            border-radius: 10px;
             &:focus {
               border-color: #f2f2f2;
             }
@@ -231,13 +240,13 @@
       display: block;
       margin: 20px auto;
       border-radius: 10px;
-      background: var(--borders);
+      background: var(--mc);
       font-weight: bold;
       border: none;
       box-shadow: none;
       padding: 10px 30px;
       font-size: 18px;
-      color: var(--mc);
+      color: var(--borders);
     }
   }
 </style>

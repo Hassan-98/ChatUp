@@ -311,7 +311,7 @@ img {
 
 body.swal2-toast-shown .swal2-container.swal2-center {
   top: unset!important;
-  bottom: 0!important;
+  bottom: 25px!important;
   width: 40%!important;
   @include lg {
     width: 60%!important;

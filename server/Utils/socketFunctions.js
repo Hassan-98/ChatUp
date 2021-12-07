@@ -13,31 +13,59 @@ const setLastActive = async (userId) => {
 }
 
 // Save A Message To DB
-const saveMessage = async (msg) => {
+const saveMessage = async (msg, tempId) => {
   try {
-    const chat_room = await ChatModel.findById(msg.chatId)
+    const chat_room = await ChatModel.findById(msg.chatId);
     if (!chat_room.usersList.includes(msg.userId)) throw new Error("You are not allowed to send messages to this chat")
 
     if (msg.userToId){
       const userTo = await UserModel.findById(msg.userToId)
 
-      var i = userTo.blockList.findIndex(user => user._id == msg.userId);
-      if (i != -1) throw new Error(`You can't send messages to ${userTo.username}`);
+      var idx = userTo.blockList.findIndex(user => user._id == msg.userId);
+      if (idx > -1) throw new Error(`You can't send messages to ${userTo.username}`);
     }
 
     var message = {};
 
-    if (msg.location) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, location: msg.location, notSeen: msg.notSeen }
+    if (msg.location) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, location: msg.location, notSeen: msg.notSeen, tempId }
 
-    else if (msg.voiceCall) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, voiceCall: msg.voiceCall, notSeen: msg.notSeen }
+    else if (msg.voiceCall) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, voiceCall: msg.voiceCall, notSeen: msg.notSeen, tempId }
 
-    else if (msg.file) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, file: msg.file, notSeen: msg.notSeen }
+    else if (msg.file) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, file: msg.file, notSeen: msg.notSeen, tempId }
 
-    else if (msg.record) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, record: msg.record, notSeen: msg.notSeen }
+    else if (msg.record) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, record: msg.record, notSeen: msg.notSeen, tempId }
 
-    else message = { user: msg.userId, msg: msg.msg, sentAt: Date.now(), sent: true, notSeen: msg.notSeen }
+    else message = { user: msg.userId, msg: msg.msg, sentAt: Date.now(), sent: true, notSeen: msg.notSeen, tempId }
 
     chat_room.messages.push(message)
+
+    await chat_room.save();
+
+    const savedChat = await ChatModel.findById(msg.chatId).populate('messages.user', ['username', 'photo', '_id']);
+
+    const Message = savedChat.messages.find(message => message.tempId == tempId);
+
+    return {message: Message, usersList: chat_room.usersList}
+  } catch (e) {
+    return {err: e.message}
+  }
+}
+
+
+// Set Message As Deleted At DB
+const deleteMessage = async ({msgId, chatId, userId}) => {
+  try {
+    const chat_room = await ChatModel.findById(chatId);
+
+    const message = chat_room.messages.find(message => message._id == msgId);
+
+    if (!message || message.user != userId) throw new Error(`You are not allowed to delete this message`);
+
+    message.deleted = true;
+
+    const messageIdx = chat_room.messages.findIndex(message => message._id == msgId);
+    
+    chat_room.messages.splice(messageIdx, 1, message);
 
     await chat_room.save();
 
@@ -46,7 +74,6 @@ const saveMessage = async (msg) => {
     return {err: e.message}
   }
 }
-
 
 // Get The Chat In Between Two Contacts
 const getChatInBetween = async (userId, userToId) => {
@@ -144,6 +171,7 @@ module.exports = {
   setLastActive,
   getChatInBetween,
   saveMessage,
+  deleteMessage,
   getAllChatsId,
   getAllFriendsId,
   removeUnSeen,

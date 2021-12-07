@@ -90,4 +90,4 @@ sw.*
 # Vim swap files
 *.swp
 
-server/Services/service-account.json
+# server/Services/service-account.json

@@ -90,9 +90,17 @@
         background: var(--white);
         text-align: left;
         padding: 15px;
+        hr {
+          @include sm {
+            margin-bottom: 0;
+          }
+        }
         span {
           font-size: 24px;
           color: var(--mc);
+          @include sm {
+            font-size: 20px;
+          }
         }
         & > i{
           float: right;
@@ -114,7 +122,8 @@
           margin: 15px auto;
 
           @include sm {
-            width: 95%;
+            width: 97%;
+            margin: 5px auto;
           }
 
           .input_group {
@@ -130,6 +139,7 @@
 
             @include sm {
               width: 100%!important;
+              margin-right: 0px;
             }
 
             label {
@@ -137,6 +147,10 @@
               padding: 0;
               width: 100%;
               margin-top: 10px;
+              @include sm {
+                margin-top: 5px;
+                margin-bottom: 5px;
+              }
             }
             span.input {
               display: flex;
@@ -146,11 +160,15 @@
                 padding: 7px 10px;
                 margin: 0 0 5px;
                 background: #f2f2f2;
-                border-radius: 0;
+                border-radius: 10px 0 0 10px;
                 border: 2px solid #f2f2f2;
                 border-right: 0;
                 font-size: 25px;
                 color: #aaa;
+                @include sm {
+                  padding: 5px 12px;
+                  font-size: 20px;
+                }
               }
               select {
                 border: none;
@@ -163,13 +181,17 @@
                 display: block;
                 margin: 0 0 5px;
                 width: 100%;
-                border-radius: 0;
+                border-radius: 0 10px 10px 0;
                 border-left: 0;
                 &:focus {
                   border-color: #f2f2f2;
                   & i {
                     border-color: var(--mc2);
                   }
+                }
+                @include sm {
+                  padding: 5px 12px;
+                  font-size: 14px;
                 }
               }
               textarea {
@@ -208,7 +230,8 @@
           position: relative;
 
           @include sm {
-            width: 95%;
+            width: 97%;
+            margin: 10px auto;
           }
 
           input {
@@ -230,6 +253,10 @@
             &:focus {
               border-color: var(--mc);
             }
+            @include sm {
+              padding: 5px 11px;
+              height: 35px;
+            }
           }
           .selection_list {
             display: flex;
@@ -243,6 +270,9 @@
             border-radius: 0 0 15px 15px;
             border: 3px solid #f6f6f6;
             overflow: hidden;
+            @include sm {
+              top: 35px;
+            }
             .friend {
               width: 100%;
               position: relative;

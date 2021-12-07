@@ -1,72 +1,76 @@
 ﻿<template>
   <div class="login-page">
-    <Icon />
-    <form>
-      <h3>Login</h3>
-      <span class="input">
-        <i class="fas fa-at" />
-        <input v-model="email" type="text" placeholder="Email Address">
-      </span>
-      <span class="input">
-        <i class="fas fa-unlock-alt" />
-        <input v-model="password" type="password" placeholder="Password">
-      </span>
-      <span class="checkBox">
-        <input id="rememberme" type="checkbox">
-        <label for="rememberme">Remember Me</label>
-      </span>
-      <nuxt-link to="/reset">
-        Reset Password
-      </nuxt-link>
-      <button @click.prevent="login">
-        Take Me In
-      </button>
-      <hr>
-      <p>Login with your social media account.</p>
-      <div class="social-login">
-        <button @click="loginWithGoogle">
-          <img src="/imgs/google-logo.svg" alt="google logo">
-          Login with Google
+    <div class="login-box">
+      <Icon />
+      <form>
+        <h3>Login</h3>
+        <span class="input">
+          <i class="fas fa-at" />
+          <input v-model="email" type="text" placeholder="Email Address">
+        </span>
+        <span class="input">
+          <i class="fas fa-unlock-alt" />
+          <input v-model="password" type="password" placeholder="Password">
+        </span>
+        <button @click.prevent="login">
+          Take Me In
         </button>
-      </div>
-      <div class="g-signin2" data-onsuccess="onSignIn" />
-      <hr>
-      <p>Not a member yet?</p>
-      <nuxt-link to="signup">
-        Join Us Now!
-      </nuxt-link>
-    </form>
+        <hr>
+        <p>Login with your social media account.</p>
+        <div class="social-login">
+          <button @click.prevent="loginWithGoogle">
+            <img src="/imgs/google-logo.svg" alt="google logo">
+            Login with Google
+          </button>
+        </div>
+        <hr>
+        <p>Not a member yet?</p>
+        <nuxt-link to="signup">
+          Join Us Now!
+        </nuxt-link>
+        <nuxt-link to="/reset">
+          Reset Password
+        </nuxt-link>
+      </form>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
   .login-page {
-    width: 45%;
-    margin: 0 auto;
+    width: 100%;
+    height: 100vh;
     display: flex;
     justify-content: center;
-    flex-direction: column;
     text-align: center;
-    @include xl {
-      width: 60%;
-    }
-    @include md {
-      width: 80%;
-    }
-    @include sm {
-      width: 95%;
-    }
-    form {
-      width: 100%;
+    align-items: center;
+    .login-box {
+      width: 35%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
       background: #fff;
       box-shadow: 1px 1px 10px rgba($color: #000000, $alpha: 0.1);
       border-radius: 10px;
-      padding: 3rem 2rem 2.5rem;
+      padding: 1.5rem 1rem 2.5rem;
       margin: 0 auto 1rem;
-      @include sm {
-        padding: 3rem 1rem 1.5rem;
-        margin-top: -35px;
+      position: relative;
+      @include xl {
+        width: 50%;
       }
+      @include md {
+        width: 60%;
+      }
+      @include sm {
+        padding: 2.6rem 1rem 1.5rem;
+        width: 95%;
+      }
+      @include xs {
+        padding: 2rem 1rem 1.5rem;
+      }
+    }
+    form {
+      width: 100%;
       h3 {
         padding-top: 10px;
         margin-bottom: 25px;
@@ -113,51 +117,8 @@
           }
         }
       }
-      span.checkBox {
-        float: left;
-        margin: 15px 50px;
-        padding: 5px 0px;
-        label {
-          position: relative;
-          top: -2px;
-          font-weight: bold;
-        }
-        input {
-          width: 15px;
-          height: 15px;
-          margin: 5px;
-        }
-        @include sm {
-          display: flex;
-          align-items: flex-end;
-          margin: 15px 0 15px 0px;
-          width: 50%;
-          padding-left: 5px;
-          label {
-            margin: 0;
-            font-size: 14px;
-          }
-          input {
-            margin: 0px;
-            margin-right: 5px;
-          }
-        }
-        input {
-          border-radius: 50%;
-        }
-      }
-      span + a {
-        float: right;
-        margin: 15px 50px;
-        padding: 5px 15px;
-        @include sm {
-          display: block;
-          margin: 15px auto;
-          width: 50%;
-        }
-      }
       button {
-        margin: 60px 0 5px;
+        margin: 20px 0 5px;
         padding: 10px 50px;
         border-radius: 5px;
         border: transparent;
@@ -180,10 +141,11 @@
       a {
         font-size: 14px;
         text-decoration: none;
-        padding: 7px 15px;
+        padding: 5px 15px;
         color: #262626;
         border: 1px solid #ccc;
         margin: 5px;
+        border-radius: 5px;
         &:hover {
           background: #ccc;
         }
@@ -261,75 +223,69 @@ export default {
   },
   methods: {
     async login (e) {
-      e.target.innerHTML = this.$store.state.loadingElement
+      e.target.innerHTML = this.$store.state.loadingElement;
       e.target.disabled = true;
-      const { email, password } = this
+      const { email, password } = this;
+
       if (email === '' || password === '') {
-        e.target.innerHTML = `Take Me In`
+        e.target.innerHTML = `Take Me In`;
         return this.Toast.fire({
-          toast: true,
           icon: 'error',
           title: 'Did you entered a correct email and password ?'
         })
-      } else {
-        const res = await this.$axios.$post('/api/auth/login', { email, password })
-        if (res.err) {
-          e.target.innerHTML = `Take Me In`;
-          e.target.disabled = false;
-          this.Toast.fire({
-            toast: true,
-            icon: 'error',
-            title: res.err
-          })
-        } else {
-          const {chats} = await this.$axios.$get(`/api/chats/${res.success._id}`);
-
-          await this.$axios.$patch(`/api/users/${res.success._id}`, { activeNow: true });
-
-          this.$store.commit('setChats', chats);
-          this.$store.commit('setUser', res.success);
-
-          this.Toast.fire({
-              toast: true,
-              icon: 'success',
-              title: 'You are now in!'
-          });
-
-          this.$router.push("/");
-        }
       }
+
+      const {success: user, err} = await this.$axios.$post('/api/auth/login', { email, password });
+
+      if (err) {
+        e.target.innerHTML = `Take Me In`;
+        e.target.disabled = false;
+        return this.Toast.fire({ icon: 'error', title: err })
+      }
+
+      const {chats} = await this.$axios.$get(`/api/chats/${user._id}`);
+
+      await this.$axios.$patch(`/api/users/${user._id}`, { activeNow: true });
+
+      this.$store.commit('setChats', chats);
+      this.$store.commit('setUser', user);
+
+      this.Toast.fire({
+          toast: true,
+          icon: 'success',
+          title: 'You are now in!'
+      });
+
+      this.$router.push("/");
     },
     async loginWithGoogle (e) {
-      e.preventDefault();
       e.target.disabled = true;
 
-      const googleUser = await this.$gAuth.signIn();
+      try {
+        const googleUser = await this.$gAuth.signIn();
 
-      const profile = googleUser.getBasicProfile()
+        const profile = googleUser.getBasicProfile()
 
-      const userProfile = {
-        id: profile.getId(),
-        email: profile.getEmail(),
-        photo: profile.getImageUrl(),
-        username: profile.getName()
-      }
+        const userProfile = {
+          id: profile.getId(),
+          email: profile.getEmail(),
+          photo: profile.getImageUrl(),
+          username: profile.getName()
+        }
 
-      const res = await this.$axios.$post('/api/auth/loginWithGoogle', { userProfile });
+        const {success: user, err} = await this.$axios.$post('/api/auth/loginWithGoogle', { userProfile });
 
-      if (res.err) {
-        e.target.disabled = false;
-        this.Toast.fire({
-          toast: true,
-          icon: 'error',
-          title: res.err
-        })
-      } else {
-        const {chats} = await this.$axios.$get(`/api/chats/${res.success._id}`);
+        if (err) {
+          e.target.disabled = false;
+          return this.Toast.fire({ icon: 'error', title: err })
+        }
 
-        await this.$axios.$patch(`/api/users/${res.success._id}`, { activeNow: true });
+        const {chats} = await this.$axios.$get(`/api/chats/${user._id}`);
+
+        await this.$axios.$patch(`/api/users/${user._id}`, { activeNow: true });
 
         this.$store.commit('setChats', chats);
-        this.$store.commit('setUser', res.success);
+        this.$store.commit('setUser', user);
 
         this.Toast.fire({
             toast: true,
@@ -338,8 +294,9 @@ export default {
         });
 
         this.$router.push("/");
+      } catch {
+          e.target.disabled = false;
       }
-      
     }
   }
 }

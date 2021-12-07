@@ -1,60 +1,71 @@
 ﻿<template>
   <div class="verify-page">
-    <Icon />
-    <form v-if="verifyData.token">
-      <h4>Set New Password</h4>
-      <span class="input">
-        <i class="fad fa-unlock-alt" />
-        <input v-model="password" type="password" placeholder="New Password">
-      </span>
-      <span class="input">
-        <i class="fad fa-unlock-alt" />
-        <input v-model="confirmPassword" type="password" placeholder="Confirm New Password">
-      </span>
-      <button @click.prevent="setNewPassword">
-        Change Password
-      </button>
-    </form>
-    <div v-else class="notValid">
-      <i class="fas fa-times-circle" />
-      <h3>Invalid Operation</h3>
-      <hr>
-      <p>Login instead ?</p>
-      <nuxt-link to="login">
-        Sign In!
-      </nuxt-link>
+    <div class="verify-box">
+      <Icon />
+      <form v-if="verifyData.token">
+        <h4>Set New Password</h4>
+        <span class="input">
+          <i class="fad fa-unlock-alt" />
+          <input v-model="password" type="password" placeholder="New Password">
+        </span>
+        <span class="input">
+          <i class="fad fa-unlock-alt" />
+          <input v-model="confirmPassword" type="password" placeholder="Confirm New Password">
+        </span>
+        <button @click.prevent="setNewPassword">
+          Change Password
+        </button>
+      </form>
+      <div v-else class="notValid">
+        <i class="fas fa-times-circle" />
+        <h3>Invalid Operation</h3>
+        <hr>
+        <p>Login instead ?</p>
+        <nuxt-link to="login">
+          Sign In!
+        </nuxt-link>
+      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
   .verify-page {
-    width: 45%;
-    margin: 0 auto;
+    width: 100%;
+    height: 100vh;
     display: flex;
     justify-content: center;
-    flex-direction: column;
     text-align: center;
-    @include xl {
-      width: 60%;
-    }
-    @include md {
-      width: 80%;
-    }
-    @include sm {
-      width: 95%;
-    }
-    form {
-      width: 100%;
+    align-items: center;
+    .verify-box {
+      width: 35%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
       background: #fff;
       box-shadow: 1px 1px 10px rgba($color: #000000, $alpha: 0.1);
       border-radius: 10px;
-      padding: 3rem 2rem 2.5rem;
-      margin: 0 auto 1rem;
-      @include sm {
-        padding: 3rem 1rem 1.5rem;
-        margin-top: -35px;
+      padding: 1.5rem 1rem 2.5rem;
+      margin: 0 auto;
+      position: relative;
+      @include xl {
+        width: 50%;
       }
+      @include md {
+        width: 60%;
+      }
+      @include sm {
+        padding: 3.5rem 1rem 1.5rem;
+        width: 95%;
+      }
+      @include xs {
+        padding: 2rem 1rem 1.5rem;
+      }
+    }
+
+    form {
+      width: 100%;
+      background: #fff;
       h4 {
         padding-top: 10px;
         margin-bottom: 25px;
@@ -136,20 +147,16 @@
     .notValid {
       width: 100%;
       background: #fff;
-      box-shadow: 1px 1px 10px rgba($color: #000000, $alpha: 0.1);
-      border-radius: 10px;
-      padding: 5rem 2rem 2.5rem;
-      margin: 0 auto 1rem;
-      @include sm {
-        padding: 3rem 1rem 1.5rem;
-        margin-top: -35px;
-      }
 
       i {
         position: relative;
         z-index: 1;
         font-size: 70px;
         color: #7e0505;
+        @include sm {
+          margin-top: 15px;
+          font-size: 50px;
+        }
       }
 
       h3 {

@@ -21,7 +21,12 @@ const Schema = mongoose.Schema({
         default: true
       },
       notSeen: [String],
-      replyTo: mongoose.Schema.ObjectId
+      tempId: Number,
+      replyTo: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Message'
+      },
+      deleted: Boolean
     }]
   },
   usersList: {

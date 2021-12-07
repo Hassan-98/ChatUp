@@ -145,7 +145,7 @@ export default () => {
           if (state.openedChatMode && state.openedChat && state.openedChat._id == chatID) state.openedChat.messages = chat.messages;
         }
       },
-      setMsgStatus(state, { chatID, msgID, sent }){
+      setMsgStatus(state, { chatID, tempId, message, sent }){
         var chats = [...state.chats];
 
         var index = chats.findIndex(chat => chat._id == chatID);
@@ -153,20 +153,46 @@ export default () => {
         if (index > -1) {
           var chat = chats.find(chat => chat._id == chatID);
           
-          var messageIndex = chat.messages.findIndex(msg => msg._id == msgID);
+          var messageIndex = chat.messages.findIndex(msg => msg._id == tempId);
 
-          if (messageIndex) {
-            var message = chat.messages.find(msg => msg._id == msgID);
-            message.sent = sent;
+          if (messageIndex > -1) {
 
-            chat.messages.splice(messageIndex, 1, message);
+            if (sent !== true) {
+              var oldMessage = chat.messages.find(msg => msg._id == tempId);
+              oldMessage.sent = sent;
+              chat.messages.splice(messageIndex, 1, oldMessage);
+            } else if (sent === true) {
+              chat.messages.splice(messageIndex, 1, message);
+            }
 
             state.chats.splice(index, 1, chat);
           }
 
           if (state.openedChatMode && state.openedChat && state.openedChat._id == chatID) state.openedChat.messages = chat.messages;
         }
+      },
+      deleteMessage(state, {msgId, chatId}) {
+        var chats = [...state.chats];
 
+        var index = chats.findIndex(chat => chat._id == chatId);
+
+        if (index > -1) {
+          var chat = chats.find(chat => chat._id == chatId);
+          
+          var messageIndex = chat.messages.findIndex(msg => msg._id == msgId);
+
+          if (messageIndex > -1) {
+            var message = chat.messages.find(msg => msg._id == msgId);
+
+            message.deleted = true;
+
+            chat.messages.splice(messageIndex, 1, message);
+
+            state.chats.splice(index, 1, chat);
+          }
+
+          if (state.openedChatMode && state.openedChat && state.openedChat._id == chatId) state.openedChat.messages = chat.messages;
+        }
       },
       editGroup(state, {groupId, groupAdmins, usersList}) {
         var allChats = [...state.chats]
@@ -217,7 +243,17 @@ export default () => {
         state.call_info = call_info
         state.inCall = true
       },
-      stopCall(state) {
+      async stopCall(state) {
+        if (window.localAudioTrack && window.client) {
+          // Destroy the local audio and track.
+          localAudioTrack.close();
+          // Leave the channel.
+          await client.leave();
+
+          window.localAudioTrack = null;
+          window.client = null;
+        }
+
         state.call_info = {
           caller: true,
           statue: "ringing",

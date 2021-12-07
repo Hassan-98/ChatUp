@@ -29,11 +29,11 @@
       </div>
     </div>
     <footer>
-      <i v-if="call_info.caller || call_info.statue === 'onGoingCall'" v-tooltip="'Mute your voice'" class="fas fa-microphone-alt-slash" @click="muteOrUnmuteVoice" />
+      <i v-if="call_info.caller || call_info.statue === 'onGoingCall'" v-tooltip="'Mute your voice'" class="far fa-microphone-alt-slash" @click="muteOrUnmuteVoice" />
       <i v-else v-tooltip="'Accept call'" class="fas fa-phone-alt" @click="acceptCall" />
-      <i v-if="call_info.statue === 'onGoingCall'" v-tooltip="'Call quality'" :class="`fad ${call_quality_class} call_quality quality_${call_quality}`" />
+      <i v-if="call_info.statue === 'onGoingCall'" v-tooltip="'Call quality'" :class="`far ${call_quality_class} call_quality quality_${call_quality}`" />
       <i v-if="call_info.statue === 'onGoingCall'" v-tooltip="'End call'" class="fas fa-phone-slash" @click="closeCall" />
-      <i v-else v-tooltip="'Cancel call'" class="fas fa-phone-slash" @click="cancelCall" />
+      <i v-else v-tooltip="'Cancel call'" class="fad fa-phone-slash" @click="cancelCall" />
     </footer>
   </div>
 </template>
@@ -61,24 +61,40 @@
     width: 50%;
     height: 60vh;
     background: #fff;
-    h5 {
-      text-transform: uppercase;
-      font-weight: bold;
-      margin-bottom: 25px;
-    }
-    img {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-    }
-    h3 {
-      font-weight: bold;
-    }
     @include xl {
       width: 70%;
     }
     @include sm {
       width: 95%;
+      padding: 10px 15px;
+    }
+    h5 {
+      text-transform: uppercase;
+      font-weight: bold;
+      margin-bottom: 25px;
+      @include sm {
+        margin-bottom: 20px;
+      }
+    }
+    img {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      @include sm {
+        width: 100px;
+        height: 100px;
+      }
+    }
+    h3 {
+      font-weight: bold;
+      @include sm {
+        margin-bottom: 0px;
+      }
+    }
+    p {
+      @include sm {
+        margin-top: 5px;
+      }
     }
     .users {
       display: flex;
@@ -88,19 +104,32 @@
       padding: 5px 0;
       max-height: 250px;
       overflow-y: scroll;
+      @include sm {
+        max-height: 140px;
+      }
       .user {
         width: 25%;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        @include sm {
+          width: 33.334%;
+        }
         img {
           width: 55px;
           height: 55px;
+          @include sm {
+            width: 45px;
+            height: 45px;
+          }
         }
         span {
           font-size: 13px;
           font-weight: bold;
+          @include sm {
+            font-size: 12px;
+          }
         }
       }
     }
@@ -118,6 +147,7 @@
       width: 70%;
     }
     @include sm {
+      padding: 10px;
       width: 95%;
     }
     i {
@@ -128,10 +158,10 @@
       font-size: 26px;
       cursor: pointer;
       @include sm {
-        width: 50px;
-        height: 50px;
-        line-height: 50px;
-        font-size: 20px;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        font-size: 18px;
       }
       &:last-of-type {
         background: red;
@@ -143,6 +173,9 @@
       &.call_quality {
         font-size: 38px;
         cursor: auto;
+        @include sm {
+          font-size: 28px;
+        }
         &.quality_1 {
           color: #00660a;
         }
@@ -168,10 +201,16 @@
         &:hover {
           color: #000;
         }
+        @include sm {
+          font-size: 26px;
+        }
       }
       &.fa-microphone-alt {
         font-size: 30px;
         color: #00660a;
+        @include sm {
+          font-size: 26px;
+        }
         &:hover {
           color: #013807;
         }
@@ -201,15 +240,15 @@ export default {
         minutes: "00"
       }, 
       RemoteStream: null,
+      call_quality: 1,
+      call_quality_class: "fa-signal",
       Toast: Swal.mixin({
               toast: true,
               position: 'bottom-center',
               showConfirmButton: false,
               timer: 5000,
               timerProgressBar: true
-            }),
-      call_quality: 1,
-      call_quality_class: "fa-signal"
+            })
     }
   },
   computed: {
@@ -319,7 +358,6 @@ export default {
       if (window.callTimeout) clearTimeout(window.callTimeout);
 
       if (this.call_info.caller) {
-
         var chat = this.findAndConvertChatMembers(this.call_info.contact._id);
 
         const message = {
@@ -339,19 +377,15 @@ export default {
           message.userToId = chat.usersList.other._id;
           message.notSeen.push(chat.usersList.other._id);
         } else {
-          Object.values(chat.usersList).forEach(contact => contact._id != currentUser._id && message.notSeen.push(contact._id));
+          Object.values(chat.usersList).forEach(contact => contact._id !=  this.currentUser._id && message.notSeen.push(contact._id));
         }
 
         this.$socket.emit('msg', message);
-
       }
 
       if (this.call_info.contactType == 'group') {
-
         if (!this.call_info.caller) return this.$store.commit('stopCall');
-
         return this.$socket.emit('cancelGroupCall', { groupID: this.call_info.contact._id });
-
       }
 
       this.$socket.emit('cancelCall', { otherUserID: this.call_info.contact._id });
@@ -381,20 +415,10 @@ export default {
           message.userToId = chat.usersList.other._id;
           message.notSeen.push(chat.usersList.other._id);
         } else {
-          Object.values(chat.usersList).forEach(contact => contact._id != currentUser._id && message.notSeen.push(contact._id));
+          Object.values(chat.usersList).forEach(contact => contact._id !=  this.currentUser._id && message.notSeen.push(contact._id));
         }
 
         this.$socket.emit('msg', message);
-      }
-
-      if (window.localAudioTrack && window.client) {
-        // Destroy the local audio and track.
-        localAudioTrack.close();
-        // Leave the channel.
-        await client.leave();
-
-        window.localAudioTrack = null;
-        window.client = null;
       }
       
       clearInterval(window.callTimer);
@@ -518,10 +542,7 @@ export default {
       }, 1500);
     },
     async callClosed () {
-      this.Toast.fire({
-        icon: 'error',
-        title: 'Call Ended'
-      })
+      this.Toast.fire({ icon: 'error', title: 'Call Ended' });
 
       if (this.call_info.caller) {
         const chat = this.findAndConvertChatMembers(this.call_info.contact._id);
@@ -544,7 +565,7 @@ export default {
           message.userToId = chat.usersList.other._id;
           message.notSeen.push(chat.usersList.other._id);
         } else {
-          Object.values(chat.usersList).forEach(contact => contact._id != currentUser._id && message.notSeen.push(contact._id));
+          Object.values(chat.usersList).forEach(contact => contact._id !=  this.currentUser._id && message.notSeen.push(contact._id));
         }
 
         this.$socket.emit('msg', message);
@@ -552,20 +573,6 @@ export default {
 
       this.$store.commit('stopCall');
 
-      if (window.localAudioTrack && window.client) {
-        // Destroy the local audio and track.
-        localAudioTrack.close();
-
-        console.log("This Call Lasted For: " + client.getRTCStats().Duration + " Seconds");
-
-        // Leave the channel.
-        await client.leave();
-
-        window.localAudioTrack = null;
-        window.client = null;
-      }
-
-      
       clearInterval(window.callTimer);
       this.timer.milliseconds = '00'
       this.timer.seconds = '00'
@@ -575,10 +582,7 @@ export default {
       
       if (groupID != this.call_info.contact._id) return;
       
-      this.Toast.fire({
-        icon: 'error',
-        title: 'Call Ended'
-      });
+      this.Toast.fire({ icon: 'error', title: 'Call Ended' });
 
       const chat = this.findAndConvertChatMembers(this.call_info.contact._id);
       const stats = window.client.getRTCStats();
@@ -600,23 +604,12 @@ export default {
         message.userToId = chat.usersList.other._id;
         message.notSeen.push(chat.usersList.other._id);
       } else {
-        Object.values(chat.usersList).forEach(contact => contact._id != currentUser._id && message.notSeen.push(contact._id));
+        Object.values(chat.usersList).forEach(contact => contact._id != this.currentUser._id && message.notSeen.push(contact._id));
       }
 
       this.$socket.emit('msg', message);
 
       this.$store.commit('stopCall');
-
-      if (window.localAudioTrack && window.client) {
-        // Destroy the local audio and track.
-        localAudioTrack.close();
-        // Leave the channel.
-        await client.leave();
-
-        window.localAudioTrack = null;
-        window.client = null;
-      }
-
       
       clearInterval(window.callTimer);
       this.timer.milliseconds = '00'
@@ -652,16 +645,13 @@ export default {
           message.userToId = chat.usersList.other._id;
           message.notSeen.push(chat.usersList.other._id);
         } else {
-          Object.values(chat.usersList).forEach(contact => contact._id != currentUser._id && message.notSeen.push(contact._id));
+          Object.values(chat.usersList).forEach(contact => contact._id !=  this.currentUser._id && message.notSeen.push(contact._id));
         }
 
         this.$socket.emit('msg', message);
       }
 
-      this.Toast.fire({
-        icon: 'error',
-        title: 'Call Cancelled'
-      })
+      this.Toast.fire({ icon: 'error', title: 'Call Cancelled' });
 
       this.$store.commit('stopCall');
       
@@ -673,10 +663,7 @@ export default {
     contactBusy () {
       if (window.callTimeout) clearTimeout(window.callTimeout);
 
-      this.Toast.fire({
-        icon: 'error',
-        title: 'This Contact is in another call'
-      })
+      this.Toast.fire({ icon: 'error', title: 'This Contact is in another call' });
 
       this.$store.commit('stopCall');
     },
@@ -727,23 +714,9 @@ export default {
     async removeAUserFromGroupCall ({removedUserID}) {
       if (this.call_info.joinedUsers.length <= 2) {
 
-        this.Toast.fire({
-          icon: 'error',
-          title: 'Call Ended'
-        })
+        this.Toast.fire({ icon: 'error', title: 'Call Ended' });
 
         this.$store.commit('stopCall');
-
-        if (window.localAudioTrack && window.client) {
-          // Destroy the local audio and track.
-          localAudioTrack.close();
-          // Leave the channel.
-          await client.leave();
-
-          window.localAudioTrack = null;
-          window.client = null;
-        }
-
         
         clearInterval(window.callTimer);
         this.timer.milliseconds = '00';

@@ -1,55 +1,66 @@
 ﻿<template>
   <div class="reset-page">
-    <Icon />
-    <form>
-      <h4>Reset Password</h4>
-      <span class="input">
-        <i class="fas fa-at" />
-        <input ref="email" type="text" placeholder="Email Address or Phone Number">
-      </span>
-      <button @click="reset">
-        Recover Password
-      </button>
-      <hr>
-      <p>Take a different action.</p>
-      <nuxt-link to="signup">
-        Join Us!
-      </nuxt-link>
-      <nuxt-link to="login">
-        Sign In!
-      </nuxt-link>
-    </form>
+    <div class="reset-box">
+      <Icon />
+      <form>
+        <h4>Reset Password</h4>
+        <span class="input">
+          <i class="fas fa-at" />
+          <input ref="email" type="text" placeholder="Email Address">
+        </span>
+        <button @click="reset">
+          Recover Password
+        </button>
+        <hr>
+        <p>Take a different action.</p>
+        <nuxt-link to="signup">
+          Join Us!
+        </nuxt-link>
+        <nuxt-link to="login">
+          Sign In!
+        </nuxt-link>
+      </form>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
   .reset-page {
-    width: 45%;
-    margin: 0 auto;
+    width: 100%;
+    height: 100vh;
     display: flex;
     justify-content: center;
-    flex-direction: column;
     text-align: center;
-    @include xl {
-      width: 60%;
+    align-items: center;
+    .reset-box {
+      width: 35%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      box-shadow: 1px 1px 10px rgba($color: #000000, $alpha: 0.1);
+      border-radius: 10px;
+      padding: 1.5rem 1rem 2.5rem;
+      margin: 0 auto 1rem;
+      position: relative;
+      @include xl {
+        width: 50%;
+      }
+      @include md {
+        width: 60%;
+      }
+      @include sm {
+        padding: 2.6rem 1rem 1.5rem;
+        width: 95%;
+      }
+      @include xs {
+        padding: 2rem 1rem 1.5rem;
+      }
     }
-    @include md {
-      width: 80%;
-    }
-    @include sm {
-      width: 95%;
-    }
+
     form {
       width: 100%;
       background: #fff;
-      box-shadow: 1px 1px 10px rgba($color: #000000, $alpha: 0.2);
-      border-radius: 5px;
-      padding: 3rem 2rem 2.5rem;
-      margin: 0 auto 1rem;
-      font-family: 'Roboto', sans-serif;
-      @include sm {
-        margin-top: -35px;
-      }
       h4 {
         padding-top: 10px;
         margin-bottom: 25px;
@@ -109,10 +120,11 @@
       a {
         font-size: 14px;
         text-decoration: none;
-        padding: 7px 15px;
+        padding: 5px 15px;
         color: #262626;
         border: 1px solid #ccc;
         margin: 5px;
+        border-radius: 5px;
         &:hover {
           background: #ccc;
         }
@@ -125,6 +137,17 @@
 /* eslint-disable */
 import Icon from '~/components/Icon.vue'
 export default {
+  data() {
+    return {
+      Toast: Swal.mixin({
+              toast: true,
+              position: 'bottom-center',
+              showConfirmButton: false,
+              timer: 3500,
+              timerProgressBar: true
+            })
+    }
+  },
   components: {
     Icon
   },
@@ -133,31 +156,15 @@ export default {
       e.preventDefault();
       var email = this.$refs.email.value;
 
-      if (!email) return Swal.fire({
-        toast: true,
-        icon: 'error',
-        title: 'You have to type your email address'
-      });
+      if (!email) return this.Toast.fire({ icon: 'error', title: 'Type your email address to reset password' });
 
-      if (!email.match(/^\S+@\S+\.\S+$/)) return Swal.fire({
-        toast: true,
-        icon: 'error',
-        title: 'Enter a valid email address'
-      });
+      if (!email.match(/^\S+@\S+\.\S+$/)) return this.Toast.fire({ icon: 'error', title: 'Enter a valid email address' });
 
-      const res = await this.$axios.$post("/api/auth/reset", {email});
+      const {err} = await this.$axios.$post("/api/auth/reset", {email});
 
-      if (res.err) return Swal.fire({
-        toast: true,
-        icon: 'error',
-        title: res.err
-      });
+      if (err) return this.Toast.fire({ icon: 'error', title: err });
 
-      Swal.fire({
-          toast: true,
-          icon: 'success',
-          title: 'Password reset mail sent to your email address'
-      });
+      this.Toast.fire({ icon: 'success', title: 'Password reset email sent to your email address' });
 
     }
   }

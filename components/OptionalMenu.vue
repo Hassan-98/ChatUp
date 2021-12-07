@@ -90,6 +90,9 @@
       padding: 40px 0 20px;
       text-align: center;
       color: var(--wit);
+      @include sm {
+        padding: 20px 0 0;
+      }
       h4 {
         margin: 0;
         font-weight: bold;
@@ -114,6 +117,9 @@
         box-shadow: none;
         color: var(--mc);
         background: var(--bg);
+        @include sm {
+          padding: 5px 15px;
+        }
         i {
           color: var(--mc);
           position: relative;
@@ -149,6 +155,9 @@
         }
         span {
           font-size: 16px;
+        }
+        @include sm {
+          margin: 15px 0;
         }
       }
       p {

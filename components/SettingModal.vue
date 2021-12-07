@@ -3,21 +3,26 @@
     <div class="chat-modal-body">
       <div class="settings">
         <section class="TOP">
-          <i v-tooltip="'close'" class="fas fa-times-circle close" @click="closeModal" />
+          <i v-tooltip="'close'" class="far fa-times close" @click="closeModal" />
           <div class="settings-nav">
             <button class="active" @click="open($event, 'GeneralSettings')">
+              <i class="fal fa-user-circle" />
               Account
             </button>
             <button @click="open($event, 'SecuritySettings')">
+              <i class="fal fa-shield-check" />
               Security
             </button>
             <button class="friendsListBtn" @click="open($event, 'FriendsList')">
+              <i class="fal fa-user-friends" />
               Friends
             </button>
             <button class="requestsListBtn" @click="open($event, 'FriendsRequests')">
-              Friend Requests
+              <i class="fal fa-bells" />
+              <span>Friend</span> Requests
             </button>
             <button @click="open($event, 'BlockList')">
+              <i class="fal fa-ban" />
               Block List
             </button>
           </div>
@@ -63,7 +68,10 @@
         position: relative;
         border-radius: 8px;
         @include sm {
-          padding: 70px 25px 15px;
+          padding: 70px 10px 15px;
+          width: 100%;
+          height: 100%;
+          border-radius: 0px;
         }
         .TOP {
             position: fixed;
@@ -76,6 +84,12 @@
             z-index: 1;
             border-radius: 8px 8px 0 0;
             overflow: hidden;
+            @include sm {
+              width: 100%;
+              left: 0;
+              top: 0;
+              border-radius: 0;
+            }
             .settings-nav {
               display: flex;
               flex-wrap: wrap;
@@ -84,7 +98,6 @@
               button {
                 padding: 15px 0;
                 font-size: 17px;
-                font-weight: bold;
                 border-radius: 0;
                 margin: 0;
                 flex: 0 0 20%;
@@ -103,9 +116,14 @@
                   border-right: 0!important;
                 }
                 @include sm {
-                  flex: 0 0 33.333%;
-                  &:nth-of-type(4), &:nth-of-type(5) {
-                    flex: 0 0 50%;
+                  flex: 0 0 50%;
+                  font-size: 14px;
+                  padding: 8px 0;
+                  &:nth-of-type(3), &:nth-of-type(4), &:nth-of-type(5) {
+                    flex: 0 0 33.333%;
+                  }
+                  span {
+                    display: none;
                   }
                 }
                 &:hover, &.active {
@@ -113,10 +131,10 @@
                   transform: none;
                   background: var(--bg);
                   color: var(--mc);
+                  box-shadow: inset 0 0 5px rgba($color: #000, $alpha: 0.05);
                 }
                 i {
-                  position: relative;
-                  top: 2px;
+                  margin-right: 5px;
                 }
               }
             }

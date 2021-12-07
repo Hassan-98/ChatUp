@@ -7,27 +7,56 @@
 
 <style lang="scss" scoped>
   .icon {
-    border-radius: 50% 50% 0 0;
-    width: 150px;
-    height: 150px;
+    border-radius: 50%;
+    width: 130px;
+    height: 130px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
     margin: auto;
-    padding: 15px;
     background: #fff;
-    position: relative;
-    top: 90px;
-    border-top: 5px solid #f3f3f3;
+    position: absolute;
+    top: -65px;
+    left: 40px;
+    box-shadow: inset 0 -5px 5px rgba($color: #000, $alpha: 0.07);
+    z-index: 1;
+    padding-bottom: 10px;
+    @include md {
+      left: 30px;
+    }
     @include sm {
-      top: 55px;
+      width: 100px;
+      height: 100px;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    @include xs {
+      width: 80px;
+      height: 80px;
+      top: -40px;
     }
     img{
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
+      @include sm {
+        width: 50px;
+        height: 50px;
+      }
+      @include xs {
+        width: 40px;
+        height: 40px;
+      }
     }
     h6 {
       font-family: 'Rock Salt', cursive;
       color: #BAC1C7;
       font-weight: bold;
       margin: 3px 0 0 0;
+      @include xs {
+        font-size: 10px;
+      }
     }
   }
 </style>
