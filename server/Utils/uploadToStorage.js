@@ -2,7 +2,18 @@
 const Multer = require('multer');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getStorage } = require('firebase-admin/storage');
-const serviceAccount = require("../Services/service-account.json");
+const serviceAccount = {
+  "type": process.env.SA_type,
+  "project_id": process.env.SA_project_id,
+  "private_key_id": process.env.SA_private_key_id,
+  "private_key": process.env.SA_private_key,
+  "client_email": process.env.SA_client_email,
+  "client_id": process.env.SW_client_id,
+  "auth_uri": process.env.SA_auth_uri,
+  "token_uri": process.env.SA_token_uri,
+  "auth_provider_x509_cert_url": process.env.SA_auth_provider_x509_cert_url,
+  "client_x509_cert_url": process.env.client_x509_cert_url
+}
 
 initializeApp({
   credential: cert(serviceAccount),

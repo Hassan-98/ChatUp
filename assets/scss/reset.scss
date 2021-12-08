@@ -328,8 +328,10 @@ body.swal2-toast-shown .swal2-container.swal2-center {
   .swal2-popup.swal2-toast {
     width: 100%!important;
     justify-content: space-between!important;
+    padding: 10px;
   }
 }
+
 
 .swal2-toast {
   .swal2-icon {

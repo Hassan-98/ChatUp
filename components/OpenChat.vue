@@ -568,6 +568,9 @@
                   filter:grayscale(0);
                 }
               }
+              @include xs {
+                padding: 7px 15px 4px;
+              }
             }
             span {
               display: block;
@@ -636,6 +639,7 @@
                 color: #212529;
                 border-radius: 0 7px 7px 0;
                 font-weight: bold;
+                line-height: 20px;
                 i {
                   font-size: 14px;
                 }
@@ -709,6 +713,7 @@
                 cursor: pointer;
                 border-radius: 0 7px 7px 0;
                 font-weight: bold;
+                line-height: 20px;
                 i {
                   font-size: 14px;
                 }
@@ -860,6 +865,7 @@
               margin: 5px 0;
               font-size: 11px;
               color: var(--mc);
+              line-height: 20px;
             }
             .file-content {
               display: flex;
@@ -1586,6 +1592,11 @@ export default {
       document.querySelector('.additional-buttons-menu').classList.toggle('show');
       this.hideEmoji();
     },
+    hideButtonMenu () {
+      document.querySelector('.buttons-menu-btn').classList.remove('rotateIt');
+      document.querySelector('.additional-buttons-menu').classList.remove('show');
+      this.hideEmoji();
+    },
     async openRecorder (e) {
       document.querySelector('.recording-modal').classList.toggle('show');
       
@@ -1606,7 +1617,7 @@ export default {
       }
 
       if (e.target.className !== 'fal fa-microphone-alt recorderIcon') {
-        this.openButtonMenu()
+        this.hideButtonMenu()
       }
     },
     async closeRecorder() {

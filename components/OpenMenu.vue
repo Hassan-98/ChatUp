@@ -46,7 +46,7 @@
         </div>
         <div class="body">
           <h6>{{ chat.usersList.other ? chat.usersList.other.username : chat.groupName }}</h6>
-          <p :style="chat.lastOneNotSeen ? 'font-weight:900;color:#000' : 'font-weight:normal'">
+          <p v-if="!chat.messages[chat.messages.length - 1].deleted" :style="chat.lastOneNotSeen ? 'font-weight:900;color:#000' : 'font-weight:normal'">
             {{
               chat.messages[chat.messages.length - 1].location ? 'Location Sent' :
               chat.messages[chat.messages.length - 1].voiceCall ? chat.messages[chat.messages.length - 1].voiceCall.missed ? "Missed Voice Call" : "Voice Call" :
@@ -54,6 +54,10 @@
               chat.messages[chat.messages.length - 1].record ? 'Record Sent' :
               chat.messages[chat.messages.length - 1].msg | cutOff
             }}
+            <i v-if="chat.lastOneNotSeen" class="fas fa-circle redAlert" />
+          </p>
+          <p v-else :style="chat.lastOneNotSeen ? 'font-weight:900;color:#000' : 'font-weight:normal'">
+            Message Deleted
             <i v-if="chat.lastOneNotSeen" class="fas fa-circle redAlert" />
           </p>
         </div>

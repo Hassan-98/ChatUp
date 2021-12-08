@@ -1,7 +1,7 @@
 ﻿<template>
   <div class="chat-modal" @click.stop="closeModal">
     <div class="chat-modal-body">
-      <i v-tooltip="'close'" class="fas fa-times-circle" @click="closeModal" />
+      <i v-tooltip="'close'" class="fas fa-times" @click="closeModal" />
       <img :src="$store.state.modalImg" alt="chat-img">
     </div>
   </div>
@@ -46,10 +46,10 @@
       position: relative;
       i{
         position: absolute;
-        top: 15px;
-        right: 25px;
+        top: 10px;
+        right: 15px;
         color: #fff;
-        font-size: 28px;
+        font-size: 24px;
         border-radius: 50%;
         box-shadow: 0 0 5px rgba($color: #000, $alpha: 0.2);
         cursor: pointer;
@@ -58,7 +58,7 @@
         }
       }
       img{
-        width: 100%;
+        width: auto;
         height: 100%;
       }
     }

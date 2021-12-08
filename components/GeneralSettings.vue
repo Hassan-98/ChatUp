@@ -3,7 +3,7 @@
     <h4>Account Settings</h4>
     <div class="Inputs">
       <div class="input-group">
-        <label>Translation Language</label>
+        <label>Native Language <i v-tooltip="'Native Language is used for messages translations and hearing'" class="fal fa-info-circle" style="position: relative;top:2pxleft:2px" /></label>
         <span class="input">
           <i class="fas fa-language" />
           <select v-model="defaultLanguage">
