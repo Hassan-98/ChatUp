@@ -17,9 +17,22 @@ const DetectLanguage = require('detectlanguage');
 const GROUPCALLS = require("./Models/groupCalls");
 
 // Cross-Origin Resource Sharing
-app.use(cors({
-  origin: "/"
-}));
+var corsOptionsDelegate = function (req, callback) {
+  // CORS Whitelist URLs
+  const whitelist = ["https://www.chatupapp.tk", "https://chatupapp.tk", "https://chatup-2020.herokuapp.com"];
+  // Whitelist localhost in development
+  if (process.env.NODE_ENV !== 'production') whitelist.push("http://localhost:3000");
+
+  var corsOptions;
+  if (whitelist.indexOf(req.header('Origin')) !== -1) {
+    corsOptions = { origin: true }
+  } else {
+    corsOptions = { origin: false }
+  }
+  callback(null, corsOptions)
+}
+
+app.use(cors(corsOptionsDelegate));
 
 // Enable ENV Vars In Development
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();

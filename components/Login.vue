@@ -214,10 +214,8 @@ export default {
       password: '',
       Toast: Swal.mixin({
               toast: true,
-              position: 'bottom-center',
               showConfirmButton: false,
-              timer: 3000,
-              timerProgressBar: true
+              timer: 5000
             }),
     }
   },
@@ -229,6 +227,7 @@ export default {
 
       if (email === '' || password === '') {
         e.target.innerHTML = `Take Me In`;
+        e.target.disabled = false;
         return this.Toast.fire({
           icon: 'error',
           title: 'Did you entered a correct email and password ?'

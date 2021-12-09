@@ -152,7 +152,7 @@ router.get('/chats/:userId', authenticated, async (req, res) => {
       path: 'usersList',
       model: 'User',
       select: ['username', 'photo', 'activeNow', 'lastActive', '_id']
-    }).populate('messages.user', ['username', 'photo', '_id']);
+    }).populate('messages.user', ['username', 'photo', '_id']).populate('messages.replyTo.user', ['username', '_id']);
 
     res.send({ chats });
     
@@ -160,6 +160,7 @@ router.get('/chats/:userId', authenticated, async (req, res) => {
     res.send({ err: e.message })
   }
 })
+
 
 // Get a Single Chat Room
 router.get('/chats/chat/:userId', authenticated, async (req, res) => {
@@ -170,10 +171,9 @@ router.get('/chats/chat/:userId', authenticated, async (req, res) => {
       select: ['username', 'photo', 'activeNow', 'lastActive', '_id']
     }).populate('messages.user', ['username', 'photo', '_id'])
 
-    var i = chat_room.usersList.findIndex(user => {
-      return user._id == req.params.userId
-    })
-    if (i == -1) throw new Error("You Are Not Allowed To Show This Chat Room")
+    var i = chat_room.usersList.findIndex(user => user._id == req.params.userId);
+
+    if (i == -1) throw new Error("You are not allowed to show this chat room")
 
     res.send({ chat_room })
   } catch (e) {

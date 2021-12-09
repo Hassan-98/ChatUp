@@ -1,4 +1,5 @@
-﻿const mongoose = require('mongoose')
+﻿/* eslint-disable */
+const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema({
   messages: {
@@ -23,20 +24,24 @@ const Schema = mongoose.Schema({
       notSeen: [String],
       tempId: Number,
       replyTo: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Message'
+        messageId: String,
+        messageContent: String,
+        user: {
+          type: mongoose.Types.ObjectId,
+          ref: 'User'
+        }
       },
       deleted: Boolean
     }]
   },
   usersList: {
-    type: [mongoose.Schema.ObjectId],
+    type: [mongoose.Types.ObjectId],
     default: [],
     ref: 'User'
   },
   roomType: {
     type: String,
-    defalut: 'Chats'
+    default: 'Chats'
   },
   groupAdmins: [String],
   groupPhoto: {

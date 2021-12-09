@@ -113,15 +113,17 @@ Schema.statics.login = async ({email, password}, res) => {
   
   if (user.google_user_id) throw Error('This email address is registered via google login only');
 
+  if (user.activeNow) throw Error("You can't login with the same account in multiple devices in the same time. logout from your account in the other device first.");
+
   const passwordMacthed = await bcrypt.compare(password, user.password)
   if (!passwordMacthed) throw Error('Your entered email address or password is incorrect');
 
-  var token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '12h' });
+  var token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
   res.cookie("currentUser", token, {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    expires: new Date(new Date().getTime() + 12 * 60 * 60 * 1000),
+    expires: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
   });
 
   return { user }
@@ -139,18 +141,20 @@ Schema.statics.loginWithGoogle = async (userProfile, res) => {
     });
   }
   
+  if (user.activeNow) throw Error("You can't login with the same account in multiple devices in the same time. logout from your account in the other device first.");
+  
   for (var prop in userProfile) {
     user[prop] = userProfile[prop];
   }
 
   await user.save();
 
-  var token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '12h' });
+  var token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
   res.cookie("currentUser", token, {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    expires: new Date(new Date().getTime() + 12 * 60 * 60 * 1000),
+    expires: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
   });
 
   return { user }

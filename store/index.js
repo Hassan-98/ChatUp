@@ -312,7 +312,7 @@ export default () => {
       }
     },
     actions: {
-      async nuxtServerInit ({ commit }, { req }){
+      async nuxtServerInit ({ commit }, { req, res }){
         const jwt = require("jsonwebtoken");
 
         if (req.url.startsWith("/verify")) {
@@ -329,18 +329,26 @@ export default () => {
 
         if (req.cookies.currentUser) {
   
-          const { userID } = jwt.verify(req.cookies.currentUser, process.env.JWT_SECRET);
+          try {
+            const { userID } = jwt.verify(req.cookies.currentUser, process.env.JWT_SECRET);
 
-          const {user} = await this.$axios.$get(`/api/users/user?userId=${userID}`);
+            const {user} = await this.$axios.$get(`/api/users/user?userId=${userID}`);
 
-          const {chats} = await this.$axios.$get(`/api/chats/${userID}`);
+            const {chats} = await this.$axios.$get(`/api/chats/${userID}`);
 
-          await this.$axios.$patch(`/api/users/${userID}`, {
-            activeNow: true
-          });
+            await this.$axios.$patch(`/api/users/${userID}`, {
+              activeNow: true
+            });
 
-          commit('setUser', user);
-          commit('setChats', chats);
+            commit('setUser', user);
+            commit('setChats', chats);
+          } catch (e) {
+            // Clear User Session
+            res.clearCookie("currentUser");
+            // Redirect To Login Page
+            res.redirect("/login");
+          }
+
         }
       }
     }

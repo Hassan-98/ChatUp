@@ -1,6 +1,7 @@
 ﻿/* eslint-disable */
 const UserModel = require('../Models/user_model')
 const ChatModel = require('../Models/chat_model')
+const mongoose = require('mongoose')
 
 // Set Last Active Date
 const setLastActive = async (userId) => {
@@ -25,23 +26,30 @@ const saveMessage = async (msg, tempId) => {
       if (idx > -1) throw new Error(`You can't send messages to ${userTo.username}`);
     }
 
-    var message = {};
+    var message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, notSeen: msg.notSeen, tempId };
 
-    if (msg.location) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, location: msg.location, notSeen: msg.notSeen, tempId }
+    if (msg.location) message.location = msg.location;
 
-    else if (msg.voiceCall) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, voiceCall: msg.voiceCall, notSeen: msg.notSeen, tempId }
+    else if (msg.voiceCall) message.voiceCall = msg.voiceCall;
 
-    else if (msg.file) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, file: msg.file, notSeen: msg.notSeen, tempId }
+    else if (msg.file) message.file = msg.file;
 
-    else if (msg.record) message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, record: msg.record, notSeen: msg.notSeen, tempId }
+    else if (msg.record) message.record = msg.record
 
-    else message = { user: msg.userId, msg: msg.msg, sentAt: Date.now(), sent: true, notSeen: msg.notSeen, tempId }
+    else message.msg = msg.msg
+
+    if (msg.replyTo) message.replyTo = {
+      ...msg.replyTo,
+      user: mongoose.Types.ObjectId(msg.replyTo.userId)
+    };
 
     chat_room.messages.push(message)
 
     await chat_room.save();
 
-    const savedChat = await ChatModel.findById(msg.chatId).populate('messages.user', ['username', 'photo', '_id']);
+    const savedChat = await ChatModel.findById(msg.chatId)
+      .populate('messages.user', ['username', 'photo', '_id'])
+      .populate('messages.replyTo.user', ['username', '_id']);
 
     const Message = savedChat.messages.find(message => message.tempId == tempId);
 
