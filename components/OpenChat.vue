@@ -137,7 +137,7 @@
             <!-- RECORD MESSAGE -->
 
             <!-- MESSAGE MENU -->
-            <i v-if="message.msg.length > 0 && !message.deleted" class="fas fa-ellipsis-v" :class="(message.replyTo && message.replyTo.user) && 'act_to_replay'" @click="openMsgMenu">
+            <i v-if="message.msg.length > 0 && !message.deleted" class="fas fa-ellipsis-v" :class="(message.replyTo && message.replyTo.user) && 'act_to_replay'">
               <ul class="options-menu">
                 <li @click="translateText($event, message.msg, currentUser.defaultLanguage, message.replyTo && message.replyTo.user)"><i class="fal fa-language" /> Translate</li>
                 <li @click="openReplayMsg(message.msg, message._id, message.user.username, message.user._id)"><i class="fal fa-reply" /> Reply</li>
@@ -515,6 +515,9 @@
                 list-style: none;
                 background: var(--white);
                 box-shadow: 0 0 3px rgba($color: #000000, $alpha: 0.15);
+                &.show {
+                  display: inline-block;
+                }
                 li {
                   padding: 10px 15px;
                   cursor: pointer;
@@ -1336,13 +1339,8 @@ export default {
         var {responseData} = await this.$axios.$get(`${translateUrl}?langpair=${lang}|${langTo}&q=${msg}`)
         var CHILDREN = 0;
         if (isThereReplay) CHILDREN = 1;
-        e.target.closest('.fa-ellipsis-v').parentElement.children[CHILDREN].textContent = responseData.translatedText
-        e.target.closest('.fa-ellipsis-v').parentElement.children[CHILDREN].title = 'Original: ' + msg
-        var menu = e.target.closest('.fa-ellipsis-v').querySelector('.options-menu')
-        if (menu) {
-          if (menu.style.display == 'none' || menu.style.display == '') menu.style.display = 'inline-block'
-          else  menu.style.display = 'none'
-        }
+        e.target.closest('.fa-ellipsis-v').parentElement.children[CHILDREN].textContent = responseData.translatedText;
+        e.target.closest('.fa-ellipsis-v').parentElement.children[CHILDREN].title = 'Original: ' + msg;
       }
     },
     async hearMsg(e, message) {
@@ -1412,13 +1410,8 @@ export default {
               says = "says"
               break;
       }
-      var msg = `${message.user.username} ${says}: ${msg}`
-      responsiveVoice.speak(msg, voice)
-      var menu = e.target.closest('.fa-ellipsis-v').querySelector('.options-menu')
-      if (menu) {
-        if (menu.style.display == 'none' || menu.style.display == '') menu.style.display = 'inline-block'
-        else  menu.style.display = 'none'
-      }
+      var msg = `${message.user.username} ${says}: ${msg}`;
+      responsiveVoice.speak(msg, voice);
     },
     selectEmoji(emoji) {
       this.msg += emoji.data
@@ -1463,13 +1456,6 @@ export default {
     },
     hideEmoji(){
       this.display = 'none'
-    },
-    openMsgMenu (e) {
-      var menu = e.target.querySelector('.options-menu')
-      if (menu) {
-        if (menu.style.display == 'none' || menu.style.display == '') menu.style.display = 'inline-block'
-        else  menu.style.display = 'none'
-      }
     },
     async send () {
       this.display = 'none'

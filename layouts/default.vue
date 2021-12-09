@@ -1,5 +1,5 @@
 <template>
-  <div @click="hideMsgsMenus">
+  <div @click="openAndHideMsgsMenus">
     <voiceCall v-if="inCall" />
     <Loading v-if="loading" />
     <nuxt v-else />
@@ -61,13 +61,15 @@ export default {
     window.getSelection = () => ''
   },
   methods: {
-    hideMsgsMenus (e) {
+    openAndHideMsgsMenus (e) {
       document.querySelectorAll('.options-menu').forEach((element) => {
-        element.style.display = 'none'
+        element.classList.remove("show")
       })
-      if (e.target.className === 'fas fa-ellipsis-v') {
-        e.target.children[0].style.display = 'inline-block'
-      }
+      if (e.target.classList.contains('fa-ellipsis-v')) {
+        const menu = e.target.querySelector('.options-menu')
+        if (menu.classList.contains("show")) return;
+        menu.classList.add("show");
+      };
     }
   }
 }
