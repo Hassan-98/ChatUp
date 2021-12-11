@@ -67,7 +67,14 @@ export default {
         this.$store.commit('ToDesktop')
       }
     }
-    this.$socket.emit('connectUser', this.currentUser)
+
+    //check if the serveice worker can work in the current browser
+    if('serviceWorker' in navigator){
+        this.subscribe().catch(err => console.error(err));
+    }
+
+    this.$socket.emit('connectUser', this.currentUser);
+
   },
   methods: {
     checkAndAddStory(user, story){
@@ -126,6 +133,60 @@ export default {
         }
       }
     },
+    urlBase64ToUint8Array(base64String) {
+      const padding = "=".repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding)
+        .replace(/\-/g, "+")
+        .replace(/_/g, "/");
+    
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+    
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    },
+    async subscribe() {
+      //register service worker
+      const register = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+
+      var serviceWorker;
+      if (register.installing) {
+          serviceWorker = register.installing;
+      } else if (register.waiting) {
+          serviceWorker = register.waiting;
+      } else if (register.active) {
+          serviceWorker = register.active;
+      }
+
+      if (!serviceWorker) return;
+
+      if (serviceWorker.state == "activated") {
+        // Get Notifications Subscription
+        const subscription = await register.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: this.urlBase64ToUint8Array(process.env.PUBLIC_VAPID_KEY)
+        });
+
+        // Send subscription to server to save
+        return await this.$axios.$post("/api/subscribeToNotifications", {userId: this.$store.state.user._id, subscription: JSON.stringify(subscription)});
+      }
+
+      serviceWorker.addEventListener("statechange", async function(e) {
+        if (e.target.state == "activated") {
+          // Get Notifications Subscription
+          const subscription = await register.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: this.urlBase64ToUint8Array(process.env.PUBLIC_VAPID_KEY)
+          });
+
+          // Send Subscription to server to save
+          await this.$axios.$post("/api/subscribeToNotifications", {userId: this.$store.state.user._id, subscription: JSON.stringify(subscription)});
+        }
+      });
+      
+    }
   },
   sockets: {
     recieveMyMsg (msg) {

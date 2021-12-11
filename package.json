@@ -44,6 +44,7 @@
     "vue-audio-visual": "^2.3.1",
     "vue-google-oauth2": "^1.5.8",
     "vue-socket.io": "^3.0.7",
+    "web-push": "^3.4.5",
     "zuck.js": "^1.6.0"
   },
   "devDependencies": {

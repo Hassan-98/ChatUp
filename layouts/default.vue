@@ -56,7 +56,6 @@ export default {
   },
   mounted () {
     this.$store.commit("stopLoading");
-    document.body.click();
     // Stop ResponsiveVoice Auto Speak
     window.getSelection = () => ''
   },

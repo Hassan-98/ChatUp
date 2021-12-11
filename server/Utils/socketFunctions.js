@@ -1,7 +1,8 @@
 ﻿/* eslint-disable */
-const UserModel = require('../Models/user_model')
-const ChatModel = require('../Models/chat_model')
-const mongoose = require('mongoose')
+const UserModel = require('../Models/user_model');
+const ChatModel = require('../Models/chat_model');
+const webpush = require('web-push');
+const mongoose = require('mongoose');
 
 // Set Last Active Date
 const setLastActive = async (userId) => {
@@ -11,6 +12,89 @@ const setLastActive = async (userId) => {
     lastActive
   })
   return {lastActive}
+}
+
+// Send Friend Request Notifications
+const sendFriendRequestNotification = async (userId, senderId) => {
+  const sender = await UserModel.findById(senderId);
+  const user = await UserModel.findById(userId);
+
+  if (sender && user && user.notifications_subscriptions && user.notifications_subscriptions.length) {
+    user.notifications_subscriptions.forEach(subscription => {
+      // Notification Payload
+      const payload = JSON.stringify({
+        title: `New friend request from ${sender.username}`,
+        body: "There is new request to checkout",
+        image: "/imgs/chat-logo.png" 
+      });
+      
+      // Send A Notification To This User
+      webpush.sendNotification(JSON.parse(subscription), payload);
+    });
+  }
+}
+
+// Send Accept Friend Notifications
+const sendAcceptFriendNotification = async (userId, senderId) => {
+  const sender = await UserModel.findById(senderId);
+  const user = await UserModel.findById(userId);
+
+  if (sender && user && user.notifications_subscriptions && user.notifications_subscriptions.length) {
+    user.notifications_subscriptions.forEach(subscription => {
+      // Notification Payload
+      const payload = JSON.stringify({
+        title: `${sender.username} accepted your friend request`,
+        body: `You can chat with ${sender.username} and see his diaries`,
+        image: "/imgs/chat-logo.png" 
+      });
+      
+      // Send A Notification To This User
+      webpush.sendNotification(JSON.parse(subscription), payload);
+    });
+  }
+}
+
+// Send Story Notification
+const sendStoryNotification = async (friendsIDs, senderId) => {
+  const sender = await UserModel.findById(senderId);
+
+  friendsIDs.forEach(async (friendId) => {
+    const friend = await UserModel.findById(friendId);
+  
+    if (sender && friend && friend.notifications_subscriptions && friend.notifications_subscriptions.length) {
+      friend.notifications_subscriptions.forEach(subscription => {
+        // Notification Payload
+        const payload = JSON.stringify({
+          title: `${sender.username} added to his diaries`,
+          body: `Go checkout ${sender.username}'s diaries`,
+          image: "/imgs/chat-logo.png" 
+        });
+        
+        // Send A Notification To This User
+        webpush.sendNotification(JSON.parse(subscription), payload);
+      });
+    }
+  })
+}
+
+// Send A Message Notifications
+const sendMessageNotifications = (users, senderId, chat) => {
+  const sender = users.find(user => user._id == senderId);
+  users.forEach(user => {
+    if (user._id !== sender._id && user.notifications_subscriptions && user.notifications_subscriptions.length) {
+      user.notifications_subscriptions.forEach(subscription => {
+        // Notification Payload
+        const payload = JSON.stringify({
+          title: `New message from ${chat.roomType == "Chats" ? sender.username : chat.groupName}`,
+          body: "There are new messages to checkout",
+          image: "/imgs/chat-logo.png" 
+        });
+        
+        // Send A Notification To This User
+        webpush.sendNotification(JSON.parse(subscription), payload);
+      });
+    }
+  });
 }
 
 // Save A Message To DB
@@ -47,11 +131,18 @@ const saveMessage = async (msg, tempId) => {
 
     await chat_room.save();
 
-    const savedChat = await ChatModel.findById(msg.chatId)
+    const savedChat = await ChatModel.findById(msg.chatId).populate({
+        path: 'usersList',
+        model: 'User',
+        select: ['username', 'notifications_subscriptions', '_id']
+      })
       .populate('messages.user', ['username', 'photo', '_id'])
       .populate('messages.replyTo.user', ['username', '_id']);
 
     const Message = savedChat.messages.find(message => message.tempId == tempId);
+
+    // Send A Notification to Chat Users
+    sendMessageNotifications(savedChat.usersList, msg.userId, savedChat);
 
     return {message: Message, usersList: chat_room.usersList}
   } catch (e) {
@@ -184,5 +275,8 @@ module.exports = {
   getAllFriendsId,
   removeUnSeen,
   editGroup,
+  sendFriendRequestNotification,
+  sendAcceptFriendNotification,
+  sendStoryNotification,
   checkPermissions
 }

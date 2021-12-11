@@ -13,13 +13,17 @@ const mongoose = require('mongoose')
 const bodyParser = require('body-parser');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
+const webpush = require('web-push');
 const DetectLanguage = require('detectlanguage');
 const GROUPCALLS = require("./Models/groupCalls");
+
+// Enable ENV Vars In Development
+if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
 // Cross-Origin Resource Sharing
 var corsOptionsDelegate = function (req, callback) {
   // CORS Whitelist URLs
-  const whitelist = ["https://www.chatupapp.tk", "https://chatupapp.tk", "https://chatup-2020.herokuapp.com"];
+  const whitelist = ["https://chatupapp.tk", "https://chatup-2020.herokuapp.com"];
   // Whitelist localhost in development
   if (process.env.NODE_ENV !== 'production') whitelist.push("http://localhost:3000");
 
@@ -34,8 +38,8 @@ var corsOptionsDelegate = function (req, callback) {
 
 app.use(cors(corsOptionsDelegate));
 
-// Enable ENV Vars In Development
-if (process.env.NODE_ENV !== 'production') require('dotenv').config();
+//setting vapid keys details
+webpush.setVapidDetails('mailto:7assan.3li1998@gmail.com', process.env.PUBLIC_VAPID_KEY, process.env.PRIVATE_VAPID_KEY);
 
 // Mongoose Database
 mongoose.connect(process.env.DB_URI, {
@@ -65,9 +69,11 @@ app.use(routesGuard);
 const authAPI = require('./Routes/auth_routes');
 const usersAPI = require('./Routes/users_routes');
 const chatsAPI = require('./Routes/chats_routes');
+const notificationsAPI = require('./Routes/notifications_routes');
 app.use('/api/auth', authAPI);
 app.use('/api', usersAPI);
 app.use('/api', chatsAPI);
+app.use('/api', notificationsAPI);
 
 // Detect Message Language Endpoint
 app.post("/detectLang", async (req, res) => {
@@ -105,7 +111,12 @@ async function start () {
   /***********************************************=== ===**********************************************/
 
   const io = require('socket.io')(server);
-  const { setLastActive, getChatInBetween, saveMessage, deleteMessage, getAllChatsId, getAllFriendsId, removeUnSeen, editGroup, checkPermissions } = require('./Utils/socketFunctions');
+  const { 
+    setLastActive, sendFriendRequestNotification,
+    sendStoryNotification, getChatInBetween, saveMessage,
+    deleteMessage, getAllChatsId, getAllFriendsId,
+    removeUnSeen, editGroup, checkPermissions
+  } = require('./Utils/socketFunctions');
 
   io.on('connection', (socket) => {
     /*| The Connected User Object |*/
@@ -209,6 +220,7 @@ async function start () {
       socket.emit('recieveStory', story);
       
       var allFriends = await getAllFriendsId(connectedUser._id)
+      sendStoryNotification(allFriends, connectedUser._id);
       allFriends.forEach(friend => {
         io.to(friend+"PERSONAL CHANNEL").emit('recieveStory', story)
       })
@@ -217,6 +229,7 @@ async function start () {
     /************** Send Friend Request **************/
     socket.on("sendFriendRequest", ({targetedContactID, senderContact}) => {
       io.to(targetedContactID+"PERSONAL CHANNEL").emit("friendRequestSent", { contact: senderContact });
+      sendFriendRequestNotification(targetedContactID, senderContact._id);
     });
 
     /************** Remove A Friend **************/
@@ -242,6 +255,7 @@ async function start () {
     /************** Accept Friend Request **************/
     socket.on("acceptFriendRequest", ({friendID, contact}) => {
       io.to(friendID+"PERSONAL CHANNEL").emit("friendRequestAccepted", { contact });
+      sendAcceptFriendNotification(contact._id, friendID);
     });
 
 

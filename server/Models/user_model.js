@@ -99,7 +99,8 @@ const Schema = mongoose.Schema(
     google_user_id: {
       type: Number,
       unique: true
-    }
+    },
+    notifications_subscriptions: [String]
   },
   {
     timestamps: true

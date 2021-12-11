@@ -53,7 +53,8 @@ module.exports = {
   env: {
     BASE_URL: process.env.BASE_URL,
     AgoraAppID: process.env.AgoraAppID,
-    GOOGLE_AUTH_CLIENT_ID: process.env.GOOGLE_AUTH_CLIENT_ID
+    GOOGLE_AUTH_CLIENT_ID: process.env.GOOGLE_AUTH_CLIENT_ID,
+    PUBLIC_VAPID_KEY: process.env.PUBLIC_VAPID_KEY
   },
   axios: {
     baseURL: process.env.BASE_URL
