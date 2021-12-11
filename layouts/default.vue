@@ -3,15 +3,6 @@
     <voiceCall v-if="inCall" />
     <Loading v-if="loading" />
     <nuxt v-else />
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-214402470-1" />
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'UA-214402470-1');
-    </script>
   </div>
 </template>
 

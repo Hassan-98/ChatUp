@@ -160,14 +160,19 @@ export default {
           serviceWorker = register.active;
       }
 
+      console.log(serviceWorker)
+
       if (!serviceWorker) return;
 
       if (serviceWorker.state == "activated") {
+        console.log(serviceWorker.state)
         // Get Notifications Subscription
         const subscription = await register.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: this.urlBase64ToUint8Array(process.env.PUBLIC_VAPID_KEY)
         });
+
+        console.log(subscription)
 
         // Send subscription to server to save
         return await this.$axios.$post("/api/subscribeToNotifications", {userId: this.$store.state.user._id, subscription: JSON.stringify(subscription)});
