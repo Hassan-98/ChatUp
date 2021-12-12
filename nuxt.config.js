@@ -30,7 +30,6 @@ module.exports = {
   ],
   styleResources: {
     scss: [
-      '@/assets/scss/reset.scss',
       '@/assets/scss/mixins.scss',
       '@/assets/scss/variables.scss'
     ]

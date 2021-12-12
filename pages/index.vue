@@ -16,14 +16,16 @@
 </template>
 
 <style lang="scss">
-  .main {
-    width: 100%;
-    height: 100vh;
-    position: relative;
-    .row {
-      margin: 0;
-    }
+@import "@/assets/scss/reset.scss";
+
+.main {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  .row {
+    margin: 0;
   }
+}
 </style>
 
 <script>

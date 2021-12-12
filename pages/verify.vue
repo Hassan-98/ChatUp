@@ -30,6 +30,7 @@
 </template>
 
 <style lang="scss" scoped>
+@import "@/assets/scss/reset.scss";
   .verify-page {
     width: 100%;
     height: 100vh;

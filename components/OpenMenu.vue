@@ -46,7 +46,7 @@
         </div>
         <div class="body">
           <h6>{{ chat.usersList.other ? chat.usersList.other.username : chat.groupName }}</h6>
-          <p v-if="!chat.messages[chat.messages.length - 1].deleted" :style="chat.lastOneNotSeen ? 'font-weight:900;color:#000' : 'font-weight:normal'">
+          <p v-if="!chat.messages[chat.messages.length - 1].deleted" :style="chat.lastOneNotSeen ? 'font-weight:900' : 'font-weight:normal'">
             {{
               chat.messages[chat.messages.length - 1].location ? 'Location Sent' :
               chat.messages[chat.messages.length - 1].voiceCall ? chat.messages[chat.messages.length - 1].voiceCall.missed ? "Missed Voice Call" : "Voice Call" :
@@ -213,7 +213,7 @@
             }
           }
           p {
-            font-family: 'Open Sans', sans-serif;
+            font-family: 'Tajawal', sans-serif;
             margin: 0;
             font-size: 12px;
             color: var(--mc);

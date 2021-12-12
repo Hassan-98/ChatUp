@@ -287,22 +287,14 @@ img {
 
 @import "mixins.scss";
 
-@import '/theme-wordpress-admin/wordpress-admin.scss';
+@import './theme-wordpress-admin/wordpress-admin.scss';
 
 #zuck-modal-content .story-viewer .slides .item>.media {
-  width: 40%!important;
-  @include xl {
-    width: 50%!important;
-  }
-  @include lg {
-    width: 65%!important;
-  }
-  @include md {
-    width: 80%!important;
-  }
-  @include xs {
-    width: 100%!important;
-  }
+  width: auto;
+  height: auto;
+  aspect-ratio: 16/9;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .swal2-container {
