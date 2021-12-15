@@ -207,10 +207,12 @@ export default {
         revertedMessages.push(messages[i])
       }
       var mediaCounter = 0;
+      var maxMedia = 6;
       var media = revertedMessages.filter((message) => {
-        if (mediaCounter >= 6) {
-          return false;
-        }
+        if (mediaCounter >= maxMedia) return false;
+
+        if (message.deleted) return false;
+        
         if (message.file) {
           var sp = message.file.split("/");
           var name = sp[sp.length - 1]
@@ -232,15 +234,17 @@ export default {
     },
     files () {
       var messages = this.$store.state.openedChat.messages;
-      var revertedMessages = []
-      for (var i = messages.length - 1; i >= 0; i--) {
-        revertedMessages.push(messages[i])
-      }
+      var revertedMessages = [];
+
+      for (var i = messages.length - 1; i >= 0; i--) { revertedMessages.push(messages[i]) }
+
       var filesCounter = 0;
+      var maxFiles = 4;
       var files = revertedMessages.filter((message) => {
-        if (filesCounter >= 4) {
-          return false;
-        }
+        if (filesCounter >= maxFiles) return false;
+
+        if (message.deleted) return false;
+
         if (message.file) {
           filesCounter++;
           return true;

@@ -13,7 +13,7 @@ html {
     -webkit-text-size-adjust: 100%;
     overflow: hidden;
     min-height: 100vh;
-    background: #f6f6f6;
+    background: var(--mc);
 }
 body {
   padding-right: 0!important;
@@ -31,8 +31,8 @@ body {
 
 <script>
 /* eslint-disable */
-import voiceCall from '~/components/voiceCall.vue'
-import Loading from '~/components/Loading.vue'
+import voiceCall from '~/components/Modals/voiceCall.vue'
+import Loading from '~/components/Modals/Loading.vue'
 export default {
   components: {
     Loading, voiceCall

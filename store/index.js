@@ -16,7 +16,7 @@ export default () => {
       desktop: true,
       noChatOpen: true,
       openSetting: 'GeneralSettings',
-      loadingElement: `<i class="fas fa-spinner loadingState"></i>`,
+      loadingElement: `<i class="fad fa-spinner-third loadingState"></i>`,
       user: null,
       OptionalMenuUser: { photo: 'Error', username: 'Error', aboutMe: 'Error', phone: 'Error', address: 'Error', website: 'Error', friendsList: [] },
       chats: [],
@@ -197,7 +197,7 @@ export default () => {
       editGroup(state, {groupId, groupAdmins, usersList}) {
         var allChats = [...state.chats]
         var group = allChats.find(chat => chat._id === groupId);
-        console.log(group);
+        
         var groupIndex = allChats.findIndex(chat => chat._id === groupId);
 
         if (usersList) {
@@ -238,6 +238,47 @@ export default () => {
             state.chats.splice(chatIDX, 1);
           }
         }
+      },
+      changeUserPictureInChats(state, {newPhoto, userId}) {
+        var chats = [...state.chats];
+
+        var newChats = chats.map(chat => {
+
+          var newMessages = chat.messages.map(message => {
+            if (message.user._id == userId) message.user.photo = newPhoto;
+            return message;
+          });
+
+          chat.messages = newMessages;
+
+          for (var key in chat.usersList) {
+            if (chat.usersList[key]._id == userId) {
+              chat.usersList[key].photo = newPhoto;
+            }
+          }
+
+          return chat;
+        });
+
+        const friendsList = state.user.friendsList.map(friend => {
+          if (friend._id == userId) friend.photo = newPhoto;
+          return friend;
+        });
+
+        const blockList = state.user.blockList.map(friend => {
+          if (friend._id == userId) friend.photo = newPhoto;
+          return friend;
+        });
+
+        const requestsList = state.user.requestsList.map(friend => {
+          if (friend._id == userId) friend.photo = newPhoto;
+          return friend;
+        });
+
+        state.chats = newChats;
+        state.user.friendsList = friendsList;
+        state.user.blockList = blockList;
+        state.user.requestsList = requestsList;
       },
       startCall(state, call_info) {
         state.call_info = call_info
@@ -307,8 +348,8 @@ export default () => {
 
         state.call_info = call_info;
       },
-      setVerifyData(state, {userID, token}) {
-        state.verifyData = {userID, token};
+      setVerifyData(state, {userID, username, token}) {
+        state.verifyData = {userID, username, token};
       }
     },
     actions: {
@@ -319,8 +360,8 @@ export default () => {
           const token = req.query.t;
           if (token) {
             try {
-              const userID = jwt.verify(token, process.env.JWT_SECRET);
-              commit("setVerifyData", {userID, token});
+              const {userID, username} = jwt.verify(token, process.env.JWT_SECRET);
+              commit("setVerifyData", {userID, username, token});
             } catch (e) {
               console.log(e)
             }

@@ -112,7 +112,7 @@ async function start () {
 
   const io = require('socket.io')(server);
   const { 
-    setLastActive, sendFriendRequestNotification,
+    setLastActive, sendFriendRequestNotification, sendAcceptFriendNotification,
     sendStoryNotification, getChatInBetween, saveMessage,
     deleteMessage, getAllChatsId, getAllFriendsId,
     removeUnSeen, editGroup, checkPermissions
@@ -258,6 +258,11 @@ async function start () {
       sendAcceptFriendNotification(contact._id, friendID);
     });
 
+    /************** Change User Picture **************/
+    socket.on("changeUserPicture", ({newPhoto, userId}) => {
+      socket.broadcast.to(userId).emit("changeUserPicture", {newPhoto, userId});
+    });
+
 
     /*****************************************************************/
     /********************| Voice Call Events |************************/
@@ -319,17 +324,19 @@ async function start () {
 
     /************** When Some Contact Joins The OnGoing Group Call **************/
     socket.on("askToJoinGroupCall", async ({groupID, askerUserID}) => {
-      var groupCall = await GROUPCALLS.findOne({ groupID });
+      try {
+        var groupCall = await GROUPCALLS.findOne({ groupID });
 
-      groupCall.joinedUsersIDs.forEach(userID => {
-        io.to(userID + 'PERSONAL CHANNEL').emit('addAUserToGroupCall', {askerUserID})
-      })
+        groupCall.joinedUsersIDs.push(askerUserID);
 
-      groupCall.joinedUsersIDs.push(askerUserID);
+        var updatedGroupCall = await groupCall.save();
 
-      var updatedGroupCall = await groupCall.save();
+        socket.emit("startAGroupCall", { group_call_info: updatedGroupCall });
 
-      socket.emit("startAGroupCall", { group_call_info: updatedGroupCall });
+        groupCall.joinedUsersIDs.forEach(userID => {
+          if (userID != askerUserID) io.to(userID + 'PERSONAL CHANNEL').emit('addAUserToGroupCall', {askerUserID})
+        })
+      } catch {}
     });
     
     /************** Cancel A Group Call **************/
@@ -338,25 +345,28 @@ async function start () {
     })
     
     /************** End & Close A Group Call **************/
-    socket.on("closeGroupCall", async ({groupID, lastUserID}) => {
-      await GROUPCALLS.findOneAndDelete({ groupID });
-      io.to(lastUserID+"PERSONAL CHANNEL").emit("callClosed");
+    socket.on("closeGroupCall", async ({groupID}) => {
+      try {
+        await GROUPCALLS.findOneAndDelete({ groupID });
+      } catch {}
       io.to(groupID).emit("groupCallClosed", { groupID });
     })
 
     /************** When Some Contact Leaves The Group Call **************/
     socket.on("removeAUserFromGroupCall", async ({groupID, removedUserID}) => {
-      var groupCall = await GROUPCALLS.findOne({ groupID });
+      try {
+        var groupCall = await GROUPCALLS.findOne({ groupID });
 
-      var index = groupCall.joinedUsersIDs.findIndex(userID => userID == removedUserID);
-
-      groupCall.joinedUsersIDs.splice(index, 1);
-
-      groupCall.joinedUsersIDs.forEach(userID => {
-        io.to(userID + 'PERSONAL CHANNEL').emit('removeAUserFromGroupCall', {removedUserID})
-      });
-
-      await groupCall.save();
+        var index = groupCall.joinedUsersIDs.findIndex(userID => userID == removedUserID);
+  
+        groupCall.joinedUsersIDs.splice(index, 1);
+  
+        groupCall.joinedUsersIDs.forEach(userID => {
+          io.to(userID + 'PERSONAL CHANNEL').emit('removeAUserFromGroupCall', {removedUserID})
+        });
+  
+        await groupCall.save();
+      } catch {}
     });
 
     /************** Cancel A Call **************/

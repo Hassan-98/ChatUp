@@ -9,7 +9,7 @@
 </style>
 
 <script>
-import Reset from '~/components/Reset.vue'
+import Reset from '~/components/Pages/Reset.vue'
 export default {
   components: {
     Reset

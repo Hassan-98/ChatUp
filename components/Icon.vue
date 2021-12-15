@@ -1,15 +1,15 @@
 ﻿<template>
   <div class="icon">
-    <img src="~static/imgs/chat-logo-nopen.png" alt="Icon">
-    <h6>ChatUp</h6>
+    <img src="/imgs/chatLogoWhite.png" alt="Icon">
+    <h4>ChatUp</h4>
   </div>
 </template>
 
 <style lang="scss" scoped>
   .icon {
     border-radius: 50%;
-    width: 130px;
-    height: 130px;
+    width: 120px;
+    height: 120px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -17,11 +17,10 @@
     margin: auto;
     background: #fff;
     position: absolute;
-    top: -65px;
+    top: -60px;
     left: 40px;
     box-shadow: inset 0 -5px 5px rgba($color: #000, $alpha: 0.07);
     z-index: 1;
-    padding-bottom: 10px;
     @include md {
       left: 30px;
     }
@@ -38,24 +37,26 @@
       top: -40px;
     }
     img{
-      width: 60px;
-      height: 60px;
+      width: 55px;
+      height: 55px;
       @include sm {
-        width: 50px;
-        height: 50px;
+        width: 45px;
+        height: 45px;
       }
       @include xs {
-        width: 40px;
-        height: 40px;
+        width: 35px;
+        height: 35px;
       }
     }
-    h6 {
+    h4 {
+      padding: 0 5px;
       font-family: 'Rock Salt', cursive;
-      color: #BAC1C7;
-      font-weight: bold;
-      margin: 3px 0 0 0;
+      font-weight: bolder;
+      color: #1b3c5a;
+      margin: 5px 0 0 0;
+      font-size: 13px;
       @include xs {
-        font-size: 10px;
+        font-size: 9px;
       }
     }
   }

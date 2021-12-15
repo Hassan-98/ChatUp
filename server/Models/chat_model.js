@@ -46,7 +46,7 @@ const Schema = mongoose.Schema({
   groupAdmins: [String],
   groupPhoto: {
     type: String,
-    default: '/un.gif'
+    default: "/imgs/default-user.jpg"
   },
   groupName: String
 }, { timestamps: true })

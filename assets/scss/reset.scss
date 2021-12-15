@@ -283,6 +283,8 @@ img {
 
 .loadingState {
   animation: 0.5s loading cubic-bezier(0, 0, 0, 0) infinite;
+  width: 30px;
+  height: 19px;
 }
 
 @import "mixins.scss";

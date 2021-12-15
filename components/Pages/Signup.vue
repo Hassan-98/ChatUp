@@ -6,22 +6,23 @@
         <h4>Join Us!</h4>
         <label>Full Name</label>
         <span class="input">
-          <i class="fas fa-user-alt" />
+          <i class="fad fa-user-alt" />
           <input v-model="username" type="text" placeholder="Full Name">
         </span>
         <label>Email Address</label>
         <span class="input">
-          <i class="fas fa-at" />
+          <i class="fad fa-at" />
           <input v-model="email" type="text" placeholder="Email Address">
         </span>
         <label>Password</label>
         <span class="input">
-          <i class="fas fa-unlock-alt" />
+          <i class="fad fa-unlock-alt" />
           <input v-model="password" type="password" placeholder="Password">
         </span>
-        <label>Avatar</label>
-        <span class="input input-file">
-          <input type="file" class="avatarImg">
+        <label>Confirm Password</label>
+        <span class="input">
+          <i class="fad fa-unlock-alt" />
+          <input v-model="confirmPassword" type="password" placeholder="Confirm Password">
         </span>
         <button @click.prevent="signup">
           Join Us!
@@ -44,6 +45,11 @@
     justify-content: center;
     text-align: center;
     align-items: center;
+    background: url('/imgs/chatLogoWhite.png') 50% 30% no-repeat;
+    background-size: 850px;
+    @include sm {
+      background-size: 800px;
+    }
     .signup-box {
       width: 35%;
       margin: 0 auto;
@@ -81,13 +87,17 @@
       background: #fff;
       h4 {
         padding-top: 0px;
-        margin-top: 0px;
+        margin-top: 10px;
         margin-bottom: 25px;
         text-transform: uppercase;
         position: relative;
         z-index: 1;
         font-family: 'Rock Salt', cursive;
-        color: #aaa;
+        font-weight: bold;
+        color: var(--mc);
+        @include sm {
+          margin-bottom: 20px;
+        }
       }
       span.input {
         display: flex;
@@ -96,17 +106,18 @@
           padding: 0rem;
         }
         i {
+          width: 50px;
           padding: 7px 10px;
           margin: 5px 0;
-          background: #f2f2f2;
+          background: var(--mc);
           border-radius: 0;
-          border: 2px solid #f2f2f2;
+          border: 2px solid var(--mc);
           border-right: 0;
-          font-size: 25px;
-          color: #aaa;
+          font-size: 24px;
+          color: #fff;
           border-radius: 10px 0 0 10px;
         }
-        input:not([type="checkbox"]) {
+        input {
           padding: 7px 12px;
           font-size: 15px;
           display: block;
@@ -114,7 +125,7 @@
           width: 100%;
           border-left: 0;
           border-radius: 0 10px 10px 0;
-          border: 1px solid #f2f2f2;
+          border: 1px solid var(--mc);
           &:focus {
             border-color: #f2f2f2;
             & i {
@@ -122,42 +133,37 @@
             }
           }
         }
-        &.input-file {
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          text-align: center;
-          input {
-            border-radius: 10px;
-          }
-        }
       }
       label {
         font-weight: bold;
-        color: var(--wit);
+        color: var(--mc);
         margin: 15px 0 0 0;
         display: block;
         text-align: left;
-        padding: 0 2.5rem;
+        padding: 0 2.8rem;
         @include sm {
+          margin: 5px 0 0 0;
           padding: 0 0.5rem;
         }
       }
       button {
         margin: 20px 0 5px;
         padding: 10px 50px;
-        border-radius: 5px;
+        border-radius: 10px;
         border: transparent;
         box-shadow: none;
-        background: #aaa;
+        background: var(--mc);
         font-size: 20px;
+        font-family: "Rock Salt";
+        font-weight: bold;
         &:hover {
           transform: none;
-          background: var(--wit);
+          background: #365472;
         }
-        @include sm {
-          width: 100%;
-          margin: 20px 0 0;
+        @include md {
+          width: 80%;
+          margin: 15px auto 5px;
+          font-size: 18px;
         }
       }
       a {
@@ -178,7 +184,7 @@
 
 <script>
 /* eslint-disable */
-import Icon from '~/components/Icon.vue'
+import Icon from '../Icon.vue'
 export default {
   components: {
     Icon
@@ -188,12 +194,11 @@ export default {
       username: '',
       email: '',
       password: '',
+      confirmPassword: '',
       Toast: Swal.mixin({
               toast: true,
-              position: 'bottom-center',
               showConfirmButton: false,
-              timer: 3000,
-              timerProgressBar: true
+              timer: 5000
             }),
     }
   },
@@ -202,22 +207,30 @@ export default {
       e.target.disabled = true;
       e.target.innerHTML = this.$store.state.loadingElement;
 
-      const { username, email, password } = this;
-      const img = document.querySelector('.avatarImg').files[0];
+      const { username, email, password, confirmPassword } = this;
 
-      if (username === '' || email === '' || password === '' || img == false) {
+      // Empty Fields Validation
+      if (username === '' || email === '' || password === '') {
         e.target.innerHTML = `Join Us!`;
         e.target.disabled = false;
         return this.Toast.fire({ icon: 'error', title: 'Oops! did you missed some fields ?' });
       }
 
-      var formdata = new FormData();
-      formdata.append('avatar', img);
-      formdata.set('username', username);
-      formdata.set('email', email);
-      formdata.set('password', password);
+      // Invalid Email Validation
+      if (!email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
+        e.target.innerHTML = `Join Us!`;
+        e.target.disabled = false;
+        return this.Toast.fire({ icon: 'error', title: "Invalid email address" });
+      }
 
-      const {err} = await this.$axios.$post('/api/auth/signup', formdata);
+      // Password Validation
+      if (password !== confirmPassword) {
+        e.target.innerHTML = `Join Us!`;
+        e.target.disabled = false;
+        return this.Toast.fire({ icon: 'error', title: "Password doesn't match" });
+      }
+
+      const {err} = await this.$axios.$post('/api/auth/signup', {username, email, password});
 
       if(err){
         e.target.innerHTML = `Join Us!`;

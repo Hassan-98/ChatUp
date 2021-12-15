@@ -56,7 +56,7 @@
             }}
             <i v-if="chat.lastOneNotSeen" class="fas fa-circle redAlert" />
           </p>
-          <p v-else :style="chat.lastOneNotSeen ? 'font-weight:900;color:#000' : 'font-weight:normal'">
+          <p v-else :style="chat.lastOneNotSeen ? 'font-weight:900' : 'font-weight:normal'">
             Message Deleted
             <i v-if="chat.lastOneNotSeen" class="fas fa-circle redAlert" />
           </p>
@@ -169,8 +169,17 @@
       }
     }
     .allChats {
-      height: 470px;
+      height: calc(100vh - 165px);
       overflow-y: scroll;
+      &.adaptWithStories {
+        height: calc(100vh - 265px);
+      }
+      @include sm {
+        height: calc(100vh - 140px);
+        &.adaptWithStories {
+          height: calc(100vh - 240px);
+        }
+      }
       .empty-chats {
         padding: 20px 0;
         h4, span {
@@ -188,6 +197,7 @@
         padding: 12px 0 12px 10px;
         cursor: pointer;
         position: relative;
+        border-radius: 10px;
         &:hover {
           background: var(--white);
 
@@ -337,6 +347,8 @@ export default {
 
     const stories = this.getStories();
 
+    if (stories.length) document.querySelector(".allChats").classList.add("adaptWithStories");
+
     // START STORIES SYSTEM
     window.STORIES = new Zuck(document.getElementById('stories'), {
       skin: 'facesnap',      // container class
@@ -426,7 +438,7 @@ export default {
         var allStories = [];
 
         // My Story
-        if(this.currentUser.stories.length > 0) {
+        if(this.currentUser.stories && this.currentUser.stories.length > 0) {
 
           var myStory = {
             id: this.currentUser._id,
@@ -462,7 +474,7 @@ export default {
 
         // My Friends Stories
         this.currentUser.friendsList.forEach(friend => {
-          if (friend.stories.length > 0) {
+          if (friend.stories && friend.stories.length > 0) {
 
             var myFriendStory = {
               id: friend._id,

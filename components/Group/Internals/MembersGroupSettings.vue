@@ -142,7 +142,8 @@
 export default {
   data () {
     return {
-      searchTxt: ''
+      searchTxt: '',
+      friends: []
     }
   },
   computed: {
@@ -160,7 +161,7 @@ export default {
       return isMeAdmin
     },
     usersList() {
-      const usersList = Object.assign({}, this.$store.state.openedChat.usersList);
+      const usersList = Object.assign({}, this.friends);
       const usersListValues = Object.values(usersList);
 
       usersListValues.map(friend => {
@@ -180,6 +181,9 @@ export default {
 
       return usersList || []
     }
+  },
+  mounted() {
+    this.friends = this.$store.state.openedChat.usersList;
   },
   methods: {
     async openProfile (userObj) {
@@ -218,7 +222,7 @@ export default {
     },
     search() {
       var username = new RegExp(this.searchTxt, 'i')
-      this.usersList = Object.values(this.currentChat.usersList).filter(friend => friend.username.search(username) > -1)
+      this.friends = Object.values(this.currentChat.usersList).filter(friend => friend.username.search(username) > -1)
     },
     makeAdmin (e, id, username) {
       const { currentChat, $socket, $store } = this

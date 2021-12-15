@@ -3,7 +3,11 @@
     <div class="verify-box">
       <Icon />
       <form v-if="verifyData.token">
-        <h4>Set New Password</h4>
+        <h5>Set New Password</h5>
+        <span class="input">
+          <i class="fad fa-user-alt" />
+          <input :value="verifyData.username" type="text" disabled>
+        </span>
         <span class="input">
           <i class="fad fa-unlock-alt" />
           <input v-model="password" type="password" placeholder="New Password">
@@ -17,7 +21,7 @@
         </button>
       </form>
       <div v-else class="notValid">
-        <i class="fas fa-times-circle" />
+        <i class="fas fa-times" />
         <h3>Invalid Operation</h3>
         <hr>
         <p>Login instead ?</p>
@@ -29,7 +33,7 @@
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import "@/assets/scss/reset.scss";
   .verify-page {
     width: 100%;
@@ -38,6 +42,8 @@
     justify-content: center;
     text-align: center;
     align-items: center;
+    background: url('/imgs/chatLogoWhite.png') 50% 30% no-repeat;
+    background-size: 750px;
     .verify-box {
       width: 35%;
       margin: 0 auto;
@@ -67,15 +73,18 @@
     form {
       width: 100%;
       background: #fff;
-      h4 {
+      h5 {
         padding-top: 10px;
+        margin-top: 0px;
         margin-bottom: 25px;
         text-transform: uppercase;
         position: relative;
         z-index: 1;
         font-family: 'Rock Salt', cursive;
-        color: #aaa;
+        font-weight: bold;
+        color: var(--mc);
         @include sm {
+          margin-top: 10px;
           margin-bottom: 20px;
         }
       }
@@ -88,15 +97,15 @@
         i {
           padding: 7px 10px;
           margin: 5px 0;
-          background: #f2f2f2;
+          background: var(--mc);
           border-radius: 0;
-          border: 2px solid #f2f2f2;
+          border: 2px solid var(--mc);
           border-right: 0;
-          font-size: 25px;
-          color: #aaa;
+          font-size: 24px;
+          color: #fff;
           border-radius: 10px 0 0 10px;
         }
-        input:not([type="checkbox"]) {
+        input {
           padding: 7px 12px;
           font-size: 15px;
           display: block;
@@ -104,8 +113,8 @@
           width: 100%;
           border-left: 0;
           border-radius: 0 10px 10px 0;
-          border: 1px solid #f2f2f2;
-          &:focus {
+          border: 1px solid var(--mc);
+          &:focus, &:disabled {
             border-color: #f2f2f2;
             & i {
               border-color: var(--mc2);
@@ -126,22 +135,25 @@
       button {
         margin: 20px 0 5px;
         padding: 10px 50px;
-        border-radius: 5px;
+        border-radius: 10px;
         border: transparent;
         box-shadow: none;
-        background: #aaa;
-        font-size: 20px;
+        background: var(--mc);
+        font-size: 18px;
+        font-family: "Rock Salt";
+        font-weight: bold;
         &:hover {
           transform: none;
-          background: var(--wit);
+          background: #365472;
         }
         @include md {
           width: 80%;
-          margin: 5px auto;
+          padding: 10px 30px;
+          margin: 15px auto 5px;
+          font-size: 16px;
         }
         @include sm {
-          width: 100%;
-          margin: 5px 0;
+          font-size: 14px;
         }
       }
     }
@@ -153,9 +165,9 @@
         position: relative;
         z-index: 1;
         font-size: 70px;
-        color: #7e0505;
+        color: var(--mc);
         @include sm {
-          margin-top: 15px;
+          margin-top: 20px;
           font-size: 50px;
         }
       }
@@ -166,9 +178,10 @@
         position: relative;
         z-index: 1;
         font-family: 'Rock Salt', cursive;
-        color: #7e0505;
+        color: var(--mc);
         @include sm {
-          margin-bottom: 20px;
+          padding-top: 0px;
+          margin-bottom: 10px;
         }
       }
 
@@ -189,18 +202,17 @@
 
 <script>
 /* eslint-disable */
-import Icon from '~/components/Icon.vue'
+import Icon from '../components/Icon.vue'
 export default {
   data(){
     return {
+      username: "",
       password: "",
       confirmPassword: "",
       Toast: Swal.mixin({
               toast: true,
-              position: 'bottom-center',
               showConfirmButton: false,
-              timer: 3000,
-              timerProgressBar: true
+              timer: 3000
             }),
     }
   },

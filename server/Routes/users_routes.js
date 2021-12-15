@@ -95,13 +95,18 @@ router.patch('/users/pass/:userId', authenticated, async (req, res) => {
 })
 
 // Edit User Picture
-router.patch('/users/pic/:userId', authenticated, multer.single('avatar'), async (req, res) => {
+router.patch('/users/change-picture/:userId', authenticated, multer.single('avatar'), async (req, res) => {
     try {
-      if (!req.file) throw new Error("No Images Provided");
+      if (!req.file) throw new Error("There are no images provided");
+
       const photo = await uploadToStorage(req.file);
-      const user = await UserModel.findByIdAndUpdate( req.params.userId, { photo }, { runValidators: true, new: true })
+
+      const user = await UserModel.findByIdAndUpdate(req.params.userId, { photo }, { runValidators: true, new: true })
+
       const oldPhotoName = extractName(req.body.currentImage);
+
       deleteFile(oldPhotoName);
+
       res.send({ success: user })
     } catch (e) {
       res.send({ err: e.message })

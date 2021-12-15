@@ -1,5 +1,6 @@
 ﻿<template>
   <div class="open-setting">
+    <ProfilePictureEditor v-if="openPictureEditor" :go-back="goBack" />
     <h4>Account Settings</h4>
     <div class="Inputs">
       <div class="input-group">
@@ -70,7 +71,12 @@
     </div>
     <label class="avatar">Avatar</label>
     <span class="input input-file">
-      <img :src="currentUser.photo" alt="user">
+      <div class="avatar-image changable">
+        <img :src="currentUser.photo" alt="user">
+        <span v-tooltip="'Change Picture'" class="overlay" @click="openProfilePictureEditor">
+          <i class="fad fa-camera-alt" />
+        </span>
+      </div>
       <input v-if="!isGoogleUser" type="file" class="editImg">
     </span>
     <button @click.prevent="save">
@@ -227,12 +233,51 @@
         justify-content: center;
         align-items: center;
         text-align: center;
-        img {
+        .editImg {
+          display: none;
+        }
+        .avatar-image {
           width: 120px;
           height: 120px;
           border-radius: 50%;
-          margin: 5px 0 15px;
           border: 2px dashed var(--wit);
+          margin: 5px 0 15px;
+          position: relative;
+          overflow: hidden;
+          img {
+            width: 100%;
+            height: 100%;
+          }
+          &.changable {
+            .overlay {
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.4);
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              position: absolute;
+              top: 0;
+              left: 0;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              opacity: 0;
+            }
+            i {
+              transition: all 0.3s ease;
+              background: none;
+              border: none;
+              color: #ccc;
+              font-size: 30px;
+              position: relative;
+              top: 3px;
+            }
+            &:hover {
+              .overlay {
+                opacity: 1;
+              }
+            }
+          }
         }
       }
     }
@@ -253,6 +298,7 @@
 
 <script>
 /* eslint-disable */
+import ProfilePictureEditor from "../Modals/ProfilePictureEditor.vue"
 export default {
   data () {
     return {
@@ -281,7 +327,8 @@ export default {
         { code: 'ru', name: 'Russian', nativeName: 'русский' },
         { code: 'es', name: 'Spanish', nativeName: 'español' },
         { code: 'tr', name: 'Turkish', nativeName: 'Türkçe' }
-      ]
+      ],
+      openPictureEditor: false
     }
   },
   computed: {
@@ -291,6 +338,9 @@ export default {
     isGoogleUser () {
       return this.$store.state.user.google_user_id ? true : false
     }
+  },
+  components: {
+    ProfilePictureEditor
   },
   mounted () {
     if (this.currentUser) {
@@ -307,17 +357,17 @@ export default {
     }
   },
   methods: {
+    openProfilePictureEditor() {
+      this.openPictureEditor = true;
+    },
+    goBack() {
+      this.openPictureEditor = false;
+    },
     async save (e) {
       e.target.innerHTML = this.$store.state.loadingElement
       const { username, website, phone, address, aboutMe, facebook, twitter, linkedin, defaultLanguage, currentUser, $store, $axios } = this;
 
-      var formdata = new FormData();
-
-      var img = false;
-
-      if (!this.isGoogleUser) img = document.querySelector('.editImg').files[0];
-
-      const userAfterUpdateData = await $axios.$patch(`/api/users/${currentUser._id}`, { 
+      const {err, success: user} = await $axios.$patch(`/api/users/${currentUser._id}`, { 
         username, website,
         phone, address,
         aboutMe, facebookLink: facebook,
@@ -325,44 +375,17 @@ export default {
         defaultLanguage 
       });
 
-      var userAfterUpdateImage = false;
-
-      if(userAfterUpdateData.err) {
+      if(err) {
         e.target.innerHTML = 'Save';
-        return Swal.fire({
-          toast: true,
-          icon: 'error',
-          title: res.err
-        })
-      } else {
-        if (img) {
-          formdata.append('avatar', img);
-          var currentImage = currentUser.photo;
-          formdata.set('currentImage', currentImage);
-
-          userAfterUpdateImage = await $axios.$patch(`/api/users/pic/${currentUser._id}`, formdata)
-
-          if (userAfterUpdateImage.err){
-            e.target.innerHTML = 'Save'
-            return Swal.fire({
-              toast: true,
-              icon: 'error',
-              text: userAfterUpdateImage.err
-            })
-          }
-        }
-
-        e.target.innerHTML = 'Save';
-
-        if (userAfterUpdateImage) $store.commit('setUser', userAfterUpdateImage.success)
-        else $store.commit('setUser', userAfterUpdateData.success)
-
-        Swal.fire({
-          toast: true,
-          icon: 'success',
-          title: 'Profile edited successfully'
-        });
+        return Swal.fire({ toast: true, icon: 'error', title: err })
       }
+
+      e.target.innerHTML = 'Save';
+
+      $store.commit('setUser', user)
+
+      Swal.fire({ toast: true, icon: 'success', title: 'Profile settings edited successfully' });
+      
     }
   }
 }

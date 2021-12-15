@@ -1,13 +1,14 @@
 ﻿/* eslint-disable */
-const UserModel = require('../Models/user_model');
-const ChatModel = require('../Models/chat_model');
+const USER = require('../Models/user_model');
+const CHAT = require('../Models/chat_model');
 const webpush = require('web-push');
 const mongoose = require('mongoose');
+const { extractName, deleteFile } = require("./uploadToStorage")
 
 // Set Last Active Date
 const setLastActive = async (userId) => {
   var lastActive = Date.now()
-  await UserModel.findByIdAndUpdate(userId, {
+  await USER.findByIdAndUpdate(userId, {
     activeNow: false,
     lastActive
   })
@@ -16,8 +17,8 @@ const setLastActive = async (userId) => {
 
 // Send Friend Request Notifications
 const sendFriendRequestNotification = async (userId, senderId) => {
-  const sender = await UserModel.findById(senderId);
-  const user = await UserModel.findById(userId);
+  const sender = await USER.findById(senderId);
+  const user = await USER.findById(userId);
 
   if (sender && user && user.notifications_subscriptions && user.notifications_subscriptions.length) {
     user.notifications_subscriptions.forEach(subscription => {
@@ -36,8 +37,8 @@ const sendFriendRequestNotification = async (userId, senderId) => {
 
 // Send Accept Friend Notifications
 const sendAcceptFriendNotification = async (userId, senderId) => {
-  const sender = await UserModel.findById(senderId);
-  const user = await UserModel.findById(userId);
+  const sender = await USER.findById(senderId);
+  const user = await USER.findById(userId);
 
   if (sender && user && user.notifications_subscriptions && user.notifications_subscriptions.length) {
     user.notifications_subscriptions.forEach(subscription => {
@@ -56,10 +57,10 @@ const sendAcceptFriendNotification = async (userId, senderId) => {
 
 // Send Story Notification
 const sendStoryNotification = async (friendsIDs, senderId) => {
-  const sender = await UserModel.findById(senderId);
+  const sender = await USER.findById(senderId);
 
   friendsIDs.forEach(async (friendId) => {
-    const friend = await UserModel.findById(friendId);
+    const friend = await USER.findById(friendId);
   
     if (sender && friend && friend.notifications_subscriptions && friend.notifications_subscriptions.length) {
       friend.notifications_subscriptions.forEach(subscription => {
@@ -100,11 +101,12 @@ const sendMessageNotifications = (users, senderId, chat) => {
 // Save A Message To DB
 const saveMessage = async (msg, tempId) => {
   try {
-    const chat_room = await ChatModel.findById(msg.chatId);
-    if (!chat_room.usersList.includes(msg.userId)) throw new Error("You are not allowed to send messages to this chat")
+    const chat_room = await CHAT.findById(msg.chatId);
+    
+    if (!chat_room.usersList.includes(msg.userId)) throw new Error("You are not allowed to send messages to this chat");
 
     if (msg.userToId){
-      const userTo = await UserModel.findById(msg.userToId)
+      const userTo = await USER.findById(msg.userToId);
 
       var idx = userTo.blockList.findIndex(user => user._id == msg.userId);
       if (idx > -1) throw new Error(`You can't send messages to ${userTo.username}`);
@@ -131,7 +133,7 @@ const saveMessage = async (msg, tempId) => {
 
     await chat_room.save();
 
-    const savedChat = await ChatModel.findById(msg.chatId).populate({
+    const savedChat = await CHAT.findById(msg.chatId).populate({
         path: 'usersList',
         model: 'User',
         select: ['username', 'notifications_subscriptions', '_id']
@@ -154,13 +156,20 @@ const saveMessage = async (msg, tempId) => {
 // Set Message As Deleted At DB
 const deleteMessage = async ({msgId, chatId, userId}) => {
   try {
-    const chat_room = await ChatModel.findById(chatId);
+    const chat_room = await CHAT.findById(chatId);
 
     const message = chat_room.messages.find(message => message._id == msgId);
 
     if (!message || message.user != userId) throw new Error(`You are not allowed to delete this message`);
 
     message.deleted = true;
+
+    if (message.file) {
+      try {
+        const oldFileName = extractName(message.file);
+        deleteFile(oldFileName);
+      } catch {}
+    }
 
     const messageIdx = chat_room.messages.findIndex(message => message._id == msgId);
     
@@ -176,11 +185,11 @@ const deleteMessage = async ({msgId, chatId, userId}) => {
 
 // Get The Chat In Between Two Contacts
 const getChatInBetween = async (userId, userToId) => {
-  var chatInBetween = await ChatModel.findOne({ usersList: { $all : [userId, userToId] }, roomType: 'Chats' })
+  var chatInBetween = await CHAT.findOne({ usersList: { $all : [userId, userToId] }, roomType: 'Chats' })
 
   if (chatInBetween) {
 
-    await ChatModel.findByIdAndDelete(chatInBetween._id);
+    await CHAT.findByIdAndDelete(chatInBetween._id);
 
     return chatInBetween;
 
@@ -190,21 +199,21 @@ const getChatInBetween = async (userId, userToId) => {
 
 // Get All Chats IDs
 const getAllChatsId = async (userId) => {
-  const chats = await ChatModel.find({ usersList: { $all : [userId] } }, { _id: 1 })
+  const chats = await CHAT.find({ usersList: { $all : [userId] } }, { _id: 1 })
   return chats
 }
 
 
 // Get All Friends IDs
 const getAllFriendsId = async (userId) => {
-  const user = await UserModel.findById(userId)
+  const user = await USER.findById(userId)
   const IDs = user.friendsList.map(friend => friend._id)
   return IDs
 }
 
 // Remove Unseen Statues
 const removeUnSeen = async ({userId, chatId}) => {
-  const chat_room = await ChatModel.findById(chatId);
+  const chat_room = await CHAT.findById(chatId);
 
   var messages = chat_room.messages.map(msg => {
     if (msg.notSeen.length > 0) {
@@ -224,7 +233,7 @@ const removeUnSeen = async ({userId, chatId}) => {
 // Edit Group Settings
 const editGroup = async ({groupId, edits}) => {
   try {
-    const chat_room = await ChatModel.findById(groupId)
+    const chat_room = await CHAT.findById(groupId)
     var {groupName, groupPhoto, groupAdmins, removedUserId, addMembers} = edits
     if (chat_room.roomType == 'Groups') {
       if (groupName) chat_room.groupName = groupName
@@ -243,7 +252,7 @@ const editGroup = async ({groupId, edits}) => {
       }
     }
     await chat_room.save()
-    var newChat = await ChatModel.find({ _id: groupId }).populate({
+    var newChat = await CHAT.find({ _id: groupId }).populate({
       path: 'usersList',
       model: 'User',
       select: ['username', 'photo', 'activeNow', 'lastActive', '_id']
@@ -257,7 +266,7 @@ const editGroup = async ({groupId, edits}) => {
 // Check Sending Messages Permissions
 const checkPermissions = async (userId, chatId) => {
   try {
-    const chat_room = await ChatModel.findById(chatId)
+    const chat_room = await CHAT.findById(chatId)
     if (!chat_room || !chat_room.usersList.includes(userId)) throw new Error("You are not allowed to send messages to this chat")
     return {allowed: true}
   } catch (e) {

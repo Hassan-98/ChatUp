@@ -244,10 +244,8 @@ export default {
       call_quality_class: "fa-signal",
       Toast: Swal.mixin({
               toast: true,
-              position: 'bottom-center',
               showConfirmButton: false,
-              timer: 5000,
-              timerProgressBar: true
+              timer: 5000
             })
     }
   },
@@ -598,7 +596,6 @@ export default {
         userToId: false,
         notSeen: []
       }
-      
 
       if (chat.usersList.other) {
         message.userToId = chat.usersList.other._id;

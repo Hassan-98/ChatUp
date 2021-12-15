@@ -5,11 +5,11 @@
       <form>
         <h4>Reset Password</h4>
         <span class="input">
-          <i class="fas fa-at" />
+          <i class="fad fa-at" />
           <input ref="email" type="text" placeholder="Email Address">
         </span>
         <button @click="reset">
-          Recover Password
+          Reset
         </button>
         <hr>
         <p>Take a different action.</p>
@@ -32,6 +32,11 @@
     justify-content: center;
     text-align: center;
     align-items: center;
+    background: url('/imgs/chatLogoWhite.png') 50% 30% no-repeat;
+    background-size: 750px;
+    @include sm {
+      background-size: 700px;
+    }
     .reset-box {
       width: 35%;
       margin: 0 auto;
@@ -67,7 +72,11 @@
         position: relative;
         z-index: 1;
         font-family: 'Rock Salt', cursive;
-        color: #aaa;
+        font-weight: bold;
+        color: var(--mc);
+        @include sm {
+          margin-bottom: 20px;
+        }
       }
       span.input {
         display: flex;
@@ -78,12 +87,12 @@
         i {
           padding: 7px 10px;
           margin: 5px 0;
-          background: #f2f2f2;
+          background: var(--mc);
           border-radius: 0;
-          border: 2px solid #f2f2f2;
+          border: 2px solid var(--mc);
           border-right: 0;
-          font-size: 25px;
-          color: #aaa;
+          font-size: 24px;
+          color: #fff;
           border-radius: 10px 0 0 10px;
         }
         input {
@@ -94,7 +103,7 @@
           width: 100%;
           border-left: 0;
           border-radius: 0 10px 10px 0;
-          border: 1px solid #f2f2f2;
+          border: 1px solid var(--mc);
           &:focus {
             border-color: #f2f2f2;
             & i {
@@ -104,17 +113,24 @@
         }
       }
       button {
-        display: block;
-        margin: 10px auto 15px;
+        margin: 20px 0 5px;
         padding: 10px 50px;
-        border-radius: 5px;
+        border-radius: 10px;
         border: transparent;
         box-shadow: none;
-        background: #aaa;
-        font-size: 18px;
+        background: var(--mc);
+        font-size: 20px;
+        font-family: "Rock Salt";
+        letter-spacing: 2px;
+        font-weight: bold;
         &:hover {
           transform: none;
-          background: var(--wit);
+          background: #365472;
+        }
+        @include md {
+          width: 80%;
+          margin: 15px auto 5px;
+          font-size: 18px;
         }
       }
       a {
@@ -135,16 +151,14 @@
 
 <script>
 /* eslint-disable */
-import Icon from '~/components/Icon.vue'
+import Icon from '../Icon.vue'
 export default {
   data() {
     return {
       Toast: Swal.mixin({
               toast: true,
-              position: 'bottom-center',
               showConfirmButton: false,
-              timer: 3500,
-              timerProgressBar: true
+              timer: 5000
             })
     }
   },
@@ -154,16 +168,33 @@ export default {
   methods: {
     async reset(e) {
       e.preventDefault();
+      e.target.innerHTML = this.$store.state.loadingElement;
+      e.target.disabled = true;
+
       var email = this.$refs.email.value;
 
-      if (!email) return this.Toast.fire({ icon: 'error', title: 'Type your email address to reset password' });
+      if (!email) {
+        e.target.innerHTML = "Reset";
+        e.target.disabled = false;
+        return this.Toast.fire({ icon: 'error', title: 'Type your email address to reset password' });
+      }
 
-      if (!email.match(/^\S+@\S+\.\S+$/)) return this.Toast.fire({ icon: 'error', title: 'Enter a valid email address' });
+      if (!email.match(/^\S+@\S+\.\S+$/)) {
+        e.target.innerHTML = "Reset";
+        e.target.disabled = false;
+        return this.Toast.fire({ icon: 'error', title: 'Enter a valid email address' });
+      }
 
       const {err} = await this.$axios.$post("/api/auth/reset", {email});
 
-      if (err) return this.Toast.fire({ icon: 'error', title: err });
+      if (err) {
+        e.target.innerHTML = "Reset";
+        e.target.disabled = false;
+        return this.Toast.fire({ icon: 'error', title: err });
+      }
 
+      e.target.innerHTML = "Reset";
+      e.target.disabled = false;
       this.Toast.fire({ icon: 'success', title: 'Password reset email sent to your email address' });
 
     }

@@ -126,10 +126,10 @@
 
 <script>
 /* eslint-disable */
-import generalGroupSettings from '~/components/generalGroupSettings.vue'
-import MembersGroupSettings from '~/components/MembersGroupSettings.vue'
-import AdminsGroupSettings from '~/components/AdminsGroupSettings.vue'
-import AddNewMembers from '~/components/AddNewMembersGroup.vue'
+import generalGroupSettings from './Internals/generalGroupSettings.vue'
+import MembersGroupSettings from './Internals/MembersGroupSettings.vue'
+import AdminsGroupSettings from './Internals/AdminsGroupSettings.vue'
+import AddNewMembers from './Internals/AddNewMembersGroup.vue'
 export default {
   components: {
     generalGroupSettings,

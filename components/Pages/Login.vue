@@ -5,11 +5,11 @@
       <form>
         <h3>Login</h3>
         <span class="input">
-          <i class="fas fa-at" />
+          <i class="fad fa-at" />
           <input v-model="email" type="text" placeholder="Email Address">
         </span>
         <span class="input">
-          <i class="fas fa-unlock-alt" />
+          <i class="fad fa-unlock-alt" />
           <input v-model="password" type="password" placeholder="Password">
         </span>
         <button @click.prevent="login">
@@ -44,6 +44,11 @@
     justify-content: center;
     text-align: center;
     align-items: center;
+    background: url('/imgs/chatLogoWhite.png') 50% 30% no-repeat;
+    background-size: 850px;
+    @include sm {
+      background-size: 750px;
+    }
     .login-box {
       width: 35%;
       margin: 0 auto;
@@ -78,7 +83,8 @@
         position: relative;
         z-index: 1;
         font-family: 'Rock Salt', cursive;
-        color: #aaa;
+        font-weight: bold;
+        color: var(--mc);
         @include sm {
           margin-bottom: 20px;
         }
@@ -90,17 +96,18 @@
           padding: 0;
         }
         i {
+          width: 50px;
           padding: 7px 10px;
           margin: 5px 0;
-          background: #f2f2f2;
+          background: var(--mc);
           border-radius: 0;
-          border: 2px solid #f2f2f2;
+          border: 2px solid var(--mc);
           border-right: 0;
           font-size: 25px;
-          color: #aaa;
+          color: #fff;
           border-radius: 10px 0 0 10px;
         }
-        input:not([type="checkbox"]) {
+        input {
           padding: 7px 12px;
           font-size: 15px;
           display: block;
@@ -108,7 +115,7 @@
           width: 100%;
           border-left: 0;
           border-radius: 0 10px 10px 0;
-          border: 1px solid #f2f2f2;
+          border: 1px solid var(--mc);
           &:focus {
             border-color: #f2f2f2;
             & i {
@@ -118,24 +125,23 @@
         }
       }
       button {
-        margin: 20px 0 5px;
+        margin: 25px 0 5px;
         padding: 10px 50px;
-        border-radius: 5px;
+        border-radius: 10px;
         border: transparent;
         box-shadow: none;
-        background: #aaa;
+        background: var(--mc);
         font-size: 20px;
+        font-family: "Rock Salt";
+        font-weight: bold;
         &:hover {
           transform: none;
-          background: var(--wit);
+          background: #365472;
         }
         @include md {
           width: 80%;
-          margin: 5px auto;
-        }
-        @include sm {
-          width: 100%;
-          margin: 5px 0;
+          margin: 15px auto 5px;
+          font-size: 18px;
         }
       }
       a {
@@ -162,6 +168,8 @@
           display: flex;
           justify-content: center;
           align-items: center;
+          font-family: "Walsheim", serif;
+          font-weight: normal;
 
           img {
             width: 35px;
@@ -203,7 +211,7 @@
 
 <script>
 /* eslint-disable */
-import Icon from '~/components/Icon.vue'
+import Icon from '../Icon.vue'
 export default {
   components: {
     Icon
@@ -232,6 +240,13 @@ export default {
           icon: 'error',
           title: 'Did you entered a correct email and password ?'
         })
+      }
+      
+      // Invalid Email Validation
+      if (!email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
+        e.target.innerHTML = `Take Me In`;
+        e.target.disabled = false;
+        return this.Toast.fire({ icon: 'error', title: "Invalid email address" });
       }
 
       const {success: user, err} = await this.$axios.$post('/api/auth/login', { email, password });

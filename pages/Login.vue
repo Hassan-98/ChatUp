@@ -9,7 +9,7 @@
 </style>
 
 <script>
-import Login from '~/components/Login.vue'
+import Login from '~/components/Pages/Login.vue'
 export default {
   components: {
     Login

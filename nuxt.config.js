@@ -9,8 +9,9 @@ module.exports = {
       { hid: 'description', name: 'description', content: 'ChatUp, The Modern Chat App' }
     ],
     link: [
-      { rel: 'icon', href: '/imgs/chat-logo.png' },
+      { rel: 'icon', href: '/imgs/chatLogoDark.png' },
       { rel: 'stylesheet', href: '/fontawesome/css/all.min.css' },
+      { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css' },
       { href: 'https://fonts.googleapis.com/css?family=Open+Sans|Roboto+Slab|Tajawal|Rock+Salt&display=swap', rel: 'stylesheet' }
     ],
     script: [
@@ -42,7 +43,7 @@ module.exports = {
     { src: '~/plugins/audioVisual.js', ssr: false },
     { src: '~/plugins/googleOAuth.js', ssr: false }
   ],
-  buildModules: ['@nuxtjs/eslint-module'],
+  // buildModules: ['@nuxtjs/eslint-module'],
   modules: [
     'bootstrap-vue/nuxt',
     '@nuxtjs/axios',

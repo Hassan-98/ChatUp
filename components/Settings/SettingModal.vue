@@ -159,11 +159,11 @@
 </style>
 
 <script>
-import GeneralSettings from '~/components/GeneralSettings.vue'
-import SecuritySettings from '~/components/SecuritySettings.vue'
-import FriendsRequests from '~/components/FriendsRequests.vue'
-import FriendsList from '~/components/FriendsList.vue'
-import BlockList from '~/components/BlockList.vue'
+import GeneralSettings from './Internals/GeneralSettings.vue'
+import SecuritySettings from './Internals/SecuritySettings.vue'
+import FriendsRequests from './Internals/FriendsRequests.vue'
+import FriendsList from './Internals/FriendsList.vue'
+import BlockList from './Internals/BlockList.vue'
 export default {
   components: {
     GeneralSettings,

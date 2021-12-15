@@ -44,7 +44,8 @@ const Schema = mongoose.Schema(
       default: 'Not Provided'
     },
     photo: {
-      type: String
+      type: String,
+      default: "/imgs/default-user.jpg"
     },
     aboutMe: {
       type: String,
@@ -110,14 +111,12 @@ const Schema = mongoose.Schema(
 // Login A User
 Schema.statics.login = async ({email, password}, res) => {
   const user = await User.findOne({ email })
-  if (!user) throw Error('Your entered email address or password is incorrect');
+  if (!user) throw Error('Email address or password is incorrect');
   
   if (user.google_user_id) throw Error('This email address is registered via google login only');
 
-  if (user.activeNow) throw Error("You can't login with the same account in multiple devices in the same time. logout from your account in the other device first.");
-
   const passwordMacthed = await bcrypt.compare(password, user.password)
-  if (!passwordMacthed) throw Error('Your entered email address or password is incorrect');
+  if (!passwordMacthed) throw Error('Email address or password is incorrect');
 
   var token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
@@ -141,8 +140,6 @@ Schema.statics.loginWithGoogle = async (userProfile, res) => {
       password: "google-user"
     });
   }
-  
-  if (user.activeNow) throw Error("You can't login with the same account in multiple devices in the same time. logout from your account in the other device first.");
   
   for (var prop in userProfile) {
     user[prop] = userProfile[prop];

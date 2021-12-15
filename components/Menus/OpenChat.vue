@@ -30,8 +30,8 @@
     </div>
     <div v-if="$store.state.noChatOpen" class="nothing">
       <div class="icon">
-        <img src="~static/imgs/chat-logo-nopen.png" alt="Icon">
-        <h4>ChatUp</h4>
+        <img src="/imgs/chatLogoNothing-Light.png" alt="Icon">
+        <h3>ChatUp</h3>
       </div>
       <h4>Click on a chat to show messages</h4>
     </div>
@@ -65,12 +65,22 @@
       </div>
       <div class="chat-body" @scroll="scrolling" @click="closeAllModals">
         <UploadingLoader v-if="isUploading" />
-        <div v-for="message in chat.messages" :key="message._id" :class="{ me: message.user._id == currentUser._id, location: message.location, file: message.file, record: message.record, voiceCall: message.voiceCall, msg: message.msg.length > 0 }">
+        <div
+          v-for="message in chat.messages"
+          :key="message._id"
+          :class="{
+            me: message.user._id == currentUser._id,
+            location: message.location && !message.deleted,
+            file: message.file && !message.deleted,
+            record: message.record && !message.deleted,
+            voiceCall: message.voiceCall && !message.deleted,
+            msg: message.msg.length > 0 || message.deleted }"
+        >
           <img :src="message.user.photo" alt="chat-img" @click="openProfile(message.user)">
 
           <div class="content">
             <!-- ReplyTo -->
-            <div v-if="message.replyTo && message.replyTo.user" :id="message.replyTo.messageId" class="replyTo">
+            <div v-if="!message.deleted && message.replyTo && message.replyTo.user" :id="message.replyTo.messageId" class="replyTo">
               <span class="user">{{ message.replyTo.user.username }}</span>
               <span class="content">{{ message.replyTo.messageContent }}</span>
             </div>
@@ -84,14 +94,14 @@
               @dblclick="openReplayMsg(message.msg, message._id, message.user.username, message.user._id)">
               {{ message.msg }}
             </p>
-            <p v-if="message.msg.length > 0 && message.deleted" class="deleted">
+            <p v-if="message.deleted" class="deleted">
               <i class="far fa-times" />
               Message Deleted
             </p>
             <!-- NORMAL MESSAGE -->
 
             <!-- VOICE CALL MESSAGE -->
-            <div v-if="message.voiceCall" :id="message._id" class="voiceCall-content" @dblclick="openReplayMsg('Voice Call', message._id, message.user.username, message.user._id)">
+            <div v-if="message.voiceCall && !message.deleted" :id="message._id" class="voiceCall-content" @dblclick="openReplayMsg('Voice Call', message._id, message.user.username, message.user._id)">
               <i v-if="message.voiceCall.missed" class="fas fa-phone-slash missed" />
               <i v-else class="fas fa-phone-square" />
               <span v-if="message.voiceCall.missed">Missed Voice Call</span>
@@ -100,14 +110,14 @@
             <!-- VOICE CALL MESSAGE -->
 
             <!-- LOCATION MESSAGE -->
-            <div v-if="message.location" :id="message._id" class="location-content" @dblclick="openReplayMsg('Location Sent', message._id, message.user.username, message.user._id)">
+            <div v-if="message.location && !message.deleted" :id="message._id" class="location-content" @dblclick="openReplayMsg('Location Sent', message._id, message.user.username, message.user._id)">
               <i class="fas fa-map-marked-alt" />
               <span @click="goToLocation(message.location)">Open Location <i>({{ message.location.lat | formatCoords }}, {{ message.location.long | formatCoords }})</i></span>
             </div>
             <!-- LOCATION MESSAGE -->
 
             <!-- FILE MESSAGE -->
-            <div v-if="message.file" :id="message._id" class="file-content" @dblclick="openReplayMsg('File Sent', message._id, message.user.username, message.user._id)">
+            <div v-if="message.file && !message.deleted" :id="message._id" class="file-content" @dblclick="openReplayMsg('File Sent', message._id, message.user.username, message.user._id)">
               <div class="iconOfFile">
                 <div class="file-icon" :data-type="message.file | formatMimetype" />
               </div>
@@ -116,7 +126,7 @@
             <!-- FILE MESSAGE -->
 
             <!-- RECORD MESSAGE -->
-            <div v-if="message.record" :id="message._id" class="record-content" @dblclick="openReplayMsg('Record Sent', message._id, message.user.username, message.user._id)">
+            <div v-if="message.record && !message.deleted" :id="message._id" class="record-content" @dblclick="openReplayMsg('Record Sent', message._id, message.user.username, message.user._id)">
               <i class="fas fa-file-audio" />
               <span>
                 <av-waveform
@@ -126,7 +136,7 @@
                   :playtime-font-size="14"
                   :playtime-slider-width="2"
                   :noplayed-line-width="0.2"
-                  :canv-width="200"
+                  :canv-width="160"
                   :canv-height="50"
                   :audio-src="message.record"
                 />
@@ -137,12 +147,20 @@
             <!-- RECORD MESSAGE -->
 
             <!-- MESSAGE MENU -->
-            <i v-if="message.msg.length > 0 && !message.deleted" class="fas fa-ellipsis-v" :class="(message.replyTo && message.replyTo.user) && 'act_to_replay'">
+            <i v-if="!message.deleted" class="fas fa-ellipsis-v" :class="(message.replyTo && message.replyTo.user) && 'act_to_replay'">
               <ul class="options-menu">
-                <li @click="translateText($event, message.msg, currentUser.defaultLanguage, message.replyTo && message.replyTo.user)"><i class="fal fa-language" /> Translate</li>
-                <li @click="openReplayMsg(message.msg, message._id, message.user.username, message.user._id)"><i class="fal fa-reply" /> Reply</li>
-                <li @click="hearMsg($event, message)"><i class="fal fa-headphones-alt" /> Listen</li>
-                <li v-if="message.user._id == currentUser._id" @click="deleteMsg(message._id)"><i class="fal fa-trash-alt" /> Delete</li>
+                <li v-if="message.msg.length" @click="translateText($event, message.msg, currentUser.defaultLanguage, message.replyTo && message.replyTo.user)">
+                  <i class="fal fa-language" /> Translate
+                </li>
+                <li v-if="message.msg.length" @click="openReplayMsg(message.msg, message._id, message.user.username, message.user._id)">
+                  <i class="fal fa-reply" /> Reply
+                </li>
+                <li v-if="message.msg.length" @click="hearMsg($event, message)">
+                  <i class="fal fa-headphones-alt" /> Listen
+                </li>
+                <li v-if="message.user._id == currentUser._id" @click="deleteMsg(message._id)">
+                  <i class="fal fa-trash-alt" /> Delete
+                </li>
               </ul>
             </i>
             <!-- MESSAGE MENU -->
@@ -162,7 +180,7 @@
         <i v-tooltip="'Cancel'" class="fal fa-times" @click="closeReplayMsg" />
       </div>
       <div class="row chat-footer">
-        <textarea v-model="msg" class="msgArea" placeholder="Type Something" @keyup="checkUniCode" />
+        <textarea v-model="msg" class="msgArea" placeholder="Type Something" @keyup="checkUniCodeOrSend" />
         <div class="right-buttons">
           <div class="btnDiv">
             <i v-tooltip="'More actions'" class="fal fa-plus buttons-menu-btn" @click="openButtonMenu" />
@@ -338,19 +356,20 @@
         border-radius: 50%;
         margin-bottom: 20px;
         img {
-          width: 100px;
-          height: 100px;
+          width: 128px;
+          height: 128px;
+          margin-left: 20px;
         }
-        h4 {
-          padding: 5px 25px;
+        h3 {
+          padding: 10px 25px 0;
           font-family: 'Rock Salt', cursive;
-          color: #BAC1C7;
+          color: #e5e5e5;
           margin: 3px 0 0 0;
         }
       }
       h4 {
         margin: 0;
-        color: #BAC1C7;
+        color: #ccc;
         border-radius: 10px;
       }
     }
@@ -490,11 +509,12 @@
             cursor: pointer;
             aspect-ratio: 16/9;
           }
+
           .content {
             width: 100%;
             & > i {
               display: inline;
-              font-size: 10px;
+              font-size: 13px;
               color: rgb(135, 134, 134);
               cursor: pointer;
               position: relative;
@@ -508,7 +528,7 @@
                 display: none;
                 position: absolute;
                 z-index: 9999999999999999;
-                top: -15px;
+                top: -80px;
                 padding: 0;
                 left: calc(100% + 5px);
                 width: 130px;
@@ -609,6 +629,7 @@
               & > i {
                 .options-menu {
                   right: calc(100% + 5px);
+                  top: -120px;
                 }
               }
             }
@@ -619,6 +640,16 @@
             p {
               background: var(--msgs);
               color: #fff;
+            }
+          }
+
+          &:first-of-type {
+            .content {
+              & > i {
+                .options-menu {
+                  top: -15px;
+                }
+              }
             }
           }
         }
@@ -643,6 +674,9 @@
               margin: 5px 0;
               font-size: 11px;
               color: var(--mc);
+            }
+            & > i {
+              display: none;
             }
             .voiceCall-content {
               display: flex;
@@ -720,8 +754,52 @@
               font-size: 11px;
               color: var(--mc);
             }
+            & > i {
+              display: none;
+              font-size: 13px;
+              color: rgb(135, 134, 134);
+              cursor: pointer;
+              position: relative;
+              top: -2px;
+              .options-menu {
+                border-radius: 8px;
+                overflow: hidden;
+                direction: ltr;
+                display: none;
+                position: absolute;
+                z-index: 9999999999999999;
+                top: -15px;
+                padding: 0;
+                left: calc(100% + 5px);
+                width: 130px;
+                list-style: none;
+                background: var(--white);
+                box-shadow: 0 0 3px rgba($color: #000000, $alpha: 0.15);
+                &.show {
+                  display: inline-block;
+                }
+                li {
+                  padding: 10px 15px;
+                  cursor: pointer;
+                  text-align: left;
+                  font-weight: 100;
+                  font-size: 14px;
+                  color: var(--mc);
+                  i {
+                    font-size: 14px;
+                    margin-right: 5px;
+                    position: relative;
+                    top: -1px;
+                    color: var(--mc);
+                  }
+                  &:hover {
+                    background: #eee;
+                  }
+                }
+              }
+            }
             .location-content {
-              display: flex;
+              display: inline-flex;
               border-radius: 7px;
               overflow: hidden;
               & > i {
@@ -758,6 +836,14 @@
             & > img {
               margin-right: 0;
               margin-left: 10px;
+            }
+            .content {
+              & > i {
+                display: inline;
+                .options-menu {
+                  right: calc(100% + 5px);
+                }
+              }
             }
             .location-content {
               & > i {
@@ -797,8 +883,52 @@
               font-size: 11px;
               color: var(--mc);
             }
+            & > i {
+              display: none;
+              font-size: 13px;
+              color: rgb(135, 134, 134);
+              cursor: pointer;
+              position: relative;
+              top: -2px;
+              .options-menu {
+                border-radius: 8px;
+                overflow: hidden;
+                direction: ltr;
+                display: none;
+                position: absolute;
+                z-index: 9999999999999999;
+                top: -15px;
+                padding: 0;
+                left: calc(100% + 5px);
+                width: 130px;
+                list-style: none;
+                background: var(--white);
+                box-shadow: 0 0 3px rgba($color: #000000, $alpha: 0.15);
+                &.show {
+                  display: inline-block;
+                }
+                li {
+                  padding: 10px 15px;
+                  cursor: pointer;
+                  text-align: left;
+                  font-weight: 100;
+                  font-size: 14px;
+                  color: var(--mc);
+                  i {
+                    font-size: 14px;
+                    margin-right: 5px;
+                    position: relative;
+                    top: -1px;
+                    color: var(--mc);
+                  }
+                  &:hover {
+                    background: #eee;
+                  }
+                }
+              }
+            }
             .record-content {
-              display: flex;
+              display: inline-flex;
               border-radius: 7px;
               & > i {
                 padding: 19px 10px 10px;
@@ -853,6 +983,14 @@
               margin-right: 0;
               margin-left: 10px;
             }
+            .content {
+              & > i {
+                display: inline;
+                .options-menu {
+                  right: calc(100% + 5px);
+                }
+              }
+            }
             .record-content {
               & > i {
                 color: #fff;
@@ -896,8 +1034,52 @@
               color: var(--mc);
               line-height: 20px;
             }
+            & > i {
+              display: none;
+              font-size: 13px;
+              color: rgb(135, 134, 134);
+              cursor: pointer;
+              position: relative;
+              top: -10px;
+              .options-menu {
+                border-radius: 8px;
+                overflow: hidden;
+                direction: ltr;
+                display: none;
+                position: absolute;
+                z-index: 9999999999999999;
+                top: -15px;
+                padding: 0;
+                left: calc(100% + 5px);
+                width: 130px;
+                list-style: none;
+                background: var(--white);
+                box-shadow: 0 0 3px rgba($color: #000000, $alpha: 0.15);
+                &.show {
+                  display: inline-block;
+                }
+                li {
+                  padding: 10px 15px;
+                  cursor: pointer;
+                  text-align: left;
+                  font-weight: 100;
+                  font-size: 14px;
+                  color: var(--mc);
+                  i {
+                    font-size: 14px;
+                    margin-right: 5px;
+                    position: relative;
+                    top: -1px;
+                    color: var(--mc);
+                  }
+                  &:hover {
+                    background: #eee;
+                  }
+                }
+              }
+            }
             .file-content {
-              display: flex;
+              display: inline-flex;
               border-radius: 7px;
               overflow: hidden;
               .iconOfFile {
@@ -939,6 +1121,14 @@
             & > img {
               margin-right: 0;
               margin-left: 10px;
+            }
+            .content {
+              & > i {
+                display: inline;
+                .options-menu {
+                  right: calc(100% + 5px);
+                }
+              }
             }
             .file-content {
               .iconOfFile {
@@ -1174,10 +1364,10 @@
 </style>
 
 <script>
-import VEmojiPicker from 'v-emoji-picker'
-import UploadingLoader from './uploading.vue'
-
 /* eslint-disable */
+import VEmojiPicker from "v-emoji-picker";
+import UploadingLoader from "../Modals/uploading.vue";
+
 const Recorder = () => {
   return new Promise((resolve) => {
     navigator.mediaDevices.getUserMedia({ audio: true })
@@ -1224,7 +1414,8 @@ export default {
         seconds: "00",
         minutes: "00"
       },
-      isUploading: false
+      isUploading: false,
+      Toast: Swal.mixin({ toast: true, showConfirmButton: false, timer: 5000 })
     }
   },
   components: {
@@ -1250,7 +1441,7 @@ export default {
 
         if (document.querySelector('.recording-modal').classList.contains('show')) {
           document.querySelector('.recording-modal').classList.remove('show');
-          clearInterval(window.timer)
+          clearInterval(window.timer);
           window.recorder.stop();
           window.stream.getAudioTracks()[0].stop();
           this.timer.milliseconds = '00'
@@ -1326,6 +1517,12 @@ export default {
         input.style.direction = 'ltr';
       }
     },
+    checkUniCodeOrSend(e) {
+      const input = e.target
+      if (e.keyCode == 13 && !e.ctrlKey) return this.send();
+      if (e.keyCode == 13 && e.ctrlKey) return input.value += "\n";
+      this.checkUniCode(e);
+    },
     closeAllModals () {
       this.display = 'none'
       document.querySelector('.buttons-menu-btn').classList.remove('rotateIt')
@@ -1336,11 +1533,14 @@ export default {
       var translateUrl = 'https://api.mymemory.translated.net/get'
       var lang = await this.$axios.$post("/detectLang", {msg});
       if(lang != langTo){
-        var {responseData} = await this.$axios.$get(`${translateUrl}?langpair=${lang}|${langTo}&q=${msg}`)
-        var CHILDREN = 0;
-        if (isThereReplay) CHILDREN = 1;
-        e.target.closest('.fa-ellipsis-v').parentElement.children[CHILDREN].textContent = responseData.translatedText;
-        e.target.closest('.fa-ellipsis-v').parentElement.children[CHILDREN].title = 'Original: ' + msg;
+        var { responseStatus, responseData: {translatedText} } = await this.$axios.$get(`${translateUrl}?langpair=${lang}|${langTo}&q=${msg}`);
+        
+        if (responseStatus == 200) {
+          var CHILDREN = 0;
+          if (isThereReplay) CHILDREN = 1;
+          e.target.closest('.fa-ellipsis-v').parentElement.children[CHILDREN].textContent = translatedText;
+          e.target.closest('.fa-ellipsis-v').parentElement.children[CHILDREN].title = 'Original: ' + msg;
+        }
       }
     },
     async hearMsg(e, message) {
@@ -1833,19 +2033,11 @@ export default {
       var idx = -1;
       if (this.chat.usersList.other) idx = this.currentUser.blockList.findIndex(user => user._id == chat.usersList.other._id);
       
-      if (idx > -1) return Swal.fire({
-        toast: true,
-        icon: 'error',
-        title: 'You blocked this contact, go to settings to unblock'
-      });
+      if (idx > -1) return this.Toast.fire({ icon: 'error', title: 'You blocked this contact, go to settings to unblock' });
 
       // Block Call if user is not active
       if (this.chat.usersList.other && !this.chat.usersList.other.activeNow) {
-        return Swal.fire({
-          toast: true,
-          icon: 'error',
-          title: 'Contact is not available'
-        })
+        return this.Toast.fire({ icon: 'error', title: 'Contact is not available' })
       }
 
       const receiverID = this.chat.usersList.other ? this.chat.usersList.other._id : this.chat._id;
@@ -1874,11 +2066,7 @@ export default {
 
       window.callTimeout = setTimeout(() => {
       
-        Swal.fire({
-          toast: true,
-          icon: 'error',
-          title: 'No Response'
-        })
+        this.Toast.fire({ icon: 'error', title: 'No Response' })
 
         $socket.emit('cancelCall', { otherUserID: receiverID });
 
@@ -1923,11 +2111,7 @@ export default {
 
         window.callTimeout = setTimeout(() => {
         
-          Swal.fire({
-            toast: true,
-            icon: 'error',
-            title: 'No Response'
-          })
+          this.Toast.fire({ icon: 'error', title: 'No Response' })
 
           $socket.emit('cancelGroupCall', { groupID: receiverID });
 

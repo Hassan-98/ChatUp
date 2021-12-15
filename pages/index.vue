@@ -30,15 +30,15 @@
 
 <script>
 /* eslint-disable */
-import SideBar from '../components/Sidebar.vue'
-import OpenMenu from '../components/OpenMenu.vue'
-import OpenChat from '../components/OpenChat.vue'
-import OptionalChatMenu from '../components/OptionalChatMenu.vue'
-import OptionalMenu from '../components/OptionalMenu.vue'
-import PictureModal from '../components/PictureModal.vue'
-import SettingModal from '../components/SettingModal.vue'
-import CreateGroup from '../components/createGroupModal.vue'
-import EditGroup from '../components/editGroupModal.vue'
+import SideBar from '../components/Menus/Sidebar.vue'
+import OpenMenu from '../components/Menus/OpenMenu.vue'
+import OpenChat from '../components/Menus/OpenChat.vue'
+import OptionalChatMenu from '../components/Menus/OptionalChatMenu.vue'
+import OptionalMenu from '../components/Menus/OptionalMenu.vue'
+import PictureModal from '../components/Modals/PictureModal.vue'
+import SettingModal from '../components/Settings/SettingModal.vue'
+import CreateGroup from '../components/Group/createGroupModal.vue'
+import EditGroup from '../components/Group/editGroupModal.vue'
 export default {
   components: {
     SideBar,
@@ -56,12 +56,13 @@ export default {
       return this.$store.state.user || false
     }
   },
-  mounted () {
+  async mounted () {
     if (window.matchMedia('(max-width: 767px)').matches) {
       this.$store.commit('ToMobile')
     } else {
       this.$store.commit('ToDesktop')
     }
+
     window.onresize = () => {
       if (window.matchMedia('(max-width: 767px)').matches) {
         this.$store.commit('ToMobile')
@@ -72,7 +73,8 @@ export default {
 
     //check if the serveice worker can work in the current browser
     if('serviceWorker' in navigator){
-        this.subscribe().catch(err => console.error(err));
+      await window.Notification.requestPermission()
+      this.subscribe().catch(err => console.error(err));
     }
 
     this.$socket.emit('connectUser', this.currentUser);
@@ -301,7 +303,13 @@ export default {
       this.$socket.emit("leaveFriendRooms", { contactID, chatID });
       this.$forceUpdate();
     },
+    changeUserPicture({ newPhoto, userId }){
+      this.$store.commit("changeUserPictureInChats", { newPhoto, userId });
+    },
     recieveStory (story) {
+      const allChatsElement = document.querySelector(".allChats");
+      if (allChatsElement) allChatsElement.classList.add("adaptWithStories");
+
       if (this.currentUser._id == story.userId) return this.checkAndAddStory(this.currentUser, story);
 
       this.currentUser.friendsList.forEach(friend => (friend._id == story.userId) && this.checkAndAddStory(friend, story));

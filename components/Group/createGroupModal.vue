@@ -414,7 +414,7 @@
 
 <script>
 /* eslint-disable */
-import UploadingLoader from './loadingRequest.vue';
+import UploadingLoader from '../Modals/loadingRequest.vue';
 
 export default {
   data () {

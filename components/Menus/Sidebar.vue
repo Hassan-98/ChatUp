@@ -1,6 +1,6 @@
 ﻿<template>
   <div class="SideBar">
-    <img src="~static/imgs/chat-logo-whiteMC.png" alt="Icon">
+    <img src="/imgs/chatLogoDark.png" alt="Icon">
     <div class="logo">
       ChatUp
     </div>
@@ -38,24 +38,28 @@
     }
     img{
       display: block;
-      margin: 5px auto;
+      margin: 5px auto -5px;
       width: 40px;
       height: 40px;
+      @include lg {
+        width: 35px;
+        height: 35px;
+      }
       @include xs {
         width: 30px;
         height: 30px;
       }
     }
-    div.logo {
+    .logo {
+      padding: 5px 5px 0;
       font-family: 'Rock Salt', cursive;
-      text-shadow: 1px 1px 1px rgba($color: #000000, $alpha: 0.2);
-      color: #f5f5f5;
       font-weight: bold;
-      margin: 0;
-      font-size: 12px;
-      margin-bottom: 30px;
+      color: #ebebeb;
+      margin: 5px 0 0 0;
+      font-size: 11px;
+
       @include xs {
-        font-size: 11px;
+        font-size: 10px;
       }
     }
     hr {
@@ -119,7 +123,8 @@ export default {
        }, 0)
     },
     toggleDarkMode (e) {
-      e.target.classList.toggle('active')
+      e.target.classList.toggle('active');
+      const nothingLogo = document.querySelector(".nothing img");
       if (e.target.classList.contains('active')) {
         localStorage.setItem('darkMode', 'ON')
         document.documentElement.style.setProperty('--mc', '#BAC1C7')
@@ -129,8 +134,8 @@ export default {
         document.documentElement.style.setProperty('--text', '#BAC1C7')
         document.documentElement.style.setProperty('--borders', '#051e345c')
         document.documentElement.style.setProperty('--bg-nothing', '#11254A')
-        document.documentElement.style.setProperty('--buttons', '#BAC1C7')
-        document.documentElement.style.setProperty('--open-bg', 'url("https://www.toptal.com/designers/subtlepatterns/patterns/dark-paths.png")')
+        document.documentElement.style.setProperty('--buttons', '#BAC1C7');
+        if (nothingLogo) nothingLogo.src = '/imgs/chatLogoNothing-Dark.png';
       } else {
         localStorage.setItem('darkMode', 'OFF')
         document.documentElement.style.setProperty('--mc', '#1E3750')
@@ -142,6 +147,7 @@ export default {
         document.documentElement.style.setProperty('--bg-nothing', '#fff')
         document.documentElement.style.setProperty('--buttons', '#dae0e5')
         document.documentElement.style.setProperty('--open-bg', 'url(https://www.toptal.com/designers/subtlepatterns/patterns/so-white.png)')
+        if (nothingLogo) nothingLogo.src = '/imgs/chatLogoNothing-Light.png';
       }
     },
     logout () {

@@ -9,7 +9,7 @@
 </style>
 
 <script>
-import Signup from '~/components/Signup.vue'
+import Signup from '~/components/Pages/Signup.vue'
 export default {
   components: {
     Signup

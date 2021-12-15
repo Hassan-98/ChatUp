@@ -7,7 +7,7 @@ const nodemailer = require("nodemailer");
 const UserModel = require('../Models/user_model');
 const RESET_TOKEN = require('../Models/ResetTokens');
 const { authenticated, notAuthenticated } = require('../Middlewares/auth_middleware')
-const { multer, uploadToStorage } = require("../Utils/uploadToStorage");
+const createResetPasswordTemplate = require("../Mails/reset_password")
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -46,14 +46,12 @@ router.post('/loginWithGoogle', notAuthenticated, async (req, res) => {
 })
 
 // Create a User
-router.post('/signup', notAuthenticated, multer.single('avatar'), async (req, res) => {
+router.post('/signup', notAuthenticated, async (req, res) => {
   try {
     const newUser = new UserModel(req.body);
-    if (req.file) {
-      const URL = await uploadToStorage(req.file);
-      newUser.photo = URL;
-    }
+
     newUser.password = await bcrypt.hash(newUser.password, 8);
+    
     const user = await newUser.save();
     
     res.send({ success: user });
@@ -79,7 +77,7 @@ router.post('/reset', notAuthenticated, async (req, res) => {
 
     if (Token && new Date().getTime() > Token.expiration) await RESET_TOKEN.findByIdAndDelete(Token._id);
 
-    const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userID: user._id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     await RESET_TOKEN.create({
       token,
@@ -87,20 +85,13 @@ router.post('/reset', notAuthenticated, async (req, res) => {
       expiration: new Date().getTime() + (60 * 60 * 1000)
     });
 
+    const resetPasswordTemplate = createResetPasswordTemplate({ username: user.username, verifyLink: `${process.env.BASE_URL}/verify?t=${token}` })
+
     const mail_content = {
-      from: "info@chatup.com",
+      from: "no-reply@chatupapp.tk",
       to: email,
       subject: "Reset Account Password - ChatUp",
-      html: `
-        <h1>Reset your password ?</h1>
-        <p>
-          If you requested a password reset for ${user.username}, use the link below to complete the process. If you didn't make this request, ignore this email.
-        </p>
-        <a href="${process.env.BASE_URL}/verify?t=${token}">Reset My Password</a>
-        <br><hr><br>
-        <h3>Getting a lot of password reset emails ?</h3>
-        <p>You can change your account settings to require personal information to reset your password.</p>
-      `
+      html: resetPasswordTemplate
     }
 
     transporter.sendMail(mail_content, (err, info) => {
