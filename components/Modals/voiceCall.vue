@@ -472,16 +472,9 @@ export default {
       // Create an audio track from the audio sampled by a microphone.
       window.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
 
-      alert("LOCAL TRACK")
-      alert(window.localAudioTrack)
-
       client.on("user-published", async (user, mediaType) => {
-        alert(mediaType)
-        alert("LISTEN TO PUSBLISH WORKING")
         // Subscribe to a remote user.
         await client.subscribe(user, mediaType);
-
-        alert("WAITING TO SUBSCRIBE WORKING")
         
         // If the subscribed track is audio.
         if (mediaType === "audio") {
@@ -489,7 +482,6 @@ export default {
           const remoteAudioTrack = user.audioTrack;
           // Play the audio track. No need to pass any DOM element.
           remoteAudioTrack.play();
-          alert(remoteAudioTrack)
         }
       });
 
