@@ -472,8 +472,8 @@ export default {
       // Create an audio track from the audio sampled by a microphone.
       window.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
 
-      // Publish the local audio track to the channel.
-      await client.publish([localAudioTrack]);
+      alert("LOCAL TRACK")
+      alert(window.localAudioTrack)
 
       client.on("user-published", async (user, mediaType) => {
         alert(mediaType)
@@ -492,6 +492,9 @@ export default {
           alert(remoteAudioTrack)
         }
       });
+
+      // Publish the local audio track to the channel.
+      await client.publish([localAudioTrack]);
 
       // Keep Tracing The Network Quality
       client.on("network-quality", (stats) => {
