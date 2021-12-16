@@ -299,7 +299,7 @@ export default {
 
             chat.usersList = usersList
           }
-          return chat.usersList.other._id == chatID;
+          return chat.usersList.other._id == chatID && chat.roomType == "Chats";
         });
 
         if (chat.usersList.length) {
@@ -483,9 +483,10 @@ export default {
         if (mediaType === "audio") {
           // Get `RemoteAudioTrack` in the `user` object.
           const remoteAudioTrack = user.audioTrack;
-          console.log(remoteAudioTrack)
           // Play the audio track. No need to pass any DOM element.
           remoteAudioTrack.play();
+          alert(user)
+          alert(remoteAudioTrack)
         }
       });
 
