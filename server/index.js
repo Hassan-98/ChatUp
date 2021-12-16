@@ -272,17 +272,22 @@ async function start () {
     socket.on("startACall", ({callerUserID, receiverID, contactType}) => {
       if (contactType == 'user') io.to(receiverID+"PERSONAL CHANNEL").emit("receiveACall", {callerUserID, contactType});
       else io.to(receiverID).emit("receiveACall", {callerUserID, contactType, receiverID});
-    })
+    });
 
     /************** Cancel Call Due To Busy Contact **************/
     socket.on("contactBusy", ({callerUserID}) => {
       io.to(callerUserID+"PERSONAL CHANNEL").emit("contactBusy");
-    })
+    });
+
+    /************** Cancel Call Due To Busy Contact **************/
+    socket.on("cantCallBlockedContact", ({callerUserID}) => {
+      io.to(callerUserID+"PERSONAL CHANNEL").emit("cantCallBlockedContact");
+    });
 
     /************** Accepting Call & Start The Call **************/
     socket.on("acceptCall", ({callerUserID, channel}) => {
       io.to(callerUserID+"PERSONAL CHANNEL").emit("callAccepted", {channel});
-    })
+    });
 
     /* 
       Emited On Clicking On Accept Group Call (True => Emit 'askToJoinGroupCall' from UI) (False => Emit 'startAGroupCall'  from UI)

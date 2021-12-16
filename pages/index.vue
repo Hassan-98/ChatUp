@@ -319,6 +319,9 @@ export default {
       if (callerUserID === this.$store.state.user._id) return;
 
       if (contactType == "user" && this.$store.state.call_info.statue === "onGoingCall") return this.$socket.emit("contactBusy", {callerUserID});
+      
+      var idx = this.currentUser.blockList.findIndex(user => user._id == callerUserID);
+      if (idx > -1) return this.$socket.emit("cantCallBlockedContact", {callerUserID});
 
       if (contactType == "group" && this.$store.state.call_info.statue === "onGoingCall") return;
 

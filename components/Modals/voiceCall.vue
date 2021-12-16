@@ -668,6 +668,13 @@ export default {
 
       this.$store.commit('stopCall');
     },
+    cantCallBlockedContact () {
+      if (window.callTimeout) clearTimeout(window.callTimeout);
+
+      this.Toast.fire({ icon: 'error', title: "You can't call this contact" });
+
+      this.$store.commit('stopCall');
+    },
     isOnGoingCall ({ isOnGoingCall }) {
       if (this.$store.state.inCall) {
         var groupID = this.call_info.contact._id;
