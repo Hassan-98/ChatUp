@@ -428,9 +428,13 @@ export default {
 
         if (this.call_info.joinedUsers.length <= 2) {
 
-          var lastUserID = this.call_info.joinedUsers.find(user => user._id !== this.$store.state.user._id)._id;
+          var lastUser = this.call_info.joinedUsers.find(user => user._id !== this.$store.state.user._id);
 
-          this.$socket.emit("closeGroupCall", { groupID: this.call_info.contact._id, lastUserID });
+          if (lastUser) {
+            var lastUserID = lastUser._id;
+
+            this.$socket.emit("closeGroupCall", { groupID: this.call_info.contact._id, lastUserID });
+          }
 
         } 
         
@@ -463,7 +467,9 @@ export default {
 
       window.client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
-      await client.join(options.appId, options.channel, null, null);
+      const join = await client.join(options.appId, options.channel, null, null);
+
+      console.log(join)
       
       // Create an audio track from the audio sampled by a microphone.
       window.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();

@@ -43,7 +43,7 @@ module.exports = {
     { src: '~/plugins/audioVisual.js', ssr: false },
     { src: '~/plugins/googleOAuth.js', ssr: false }
   ],
-  // buildModules: ['@nuxtjs/eslint-module'],
+  buildModules: ['@nuxtjs/eslint-module'],
   modules: [
     'bootstrap-vue/nuxt',
     '@nuxtjs/axios',

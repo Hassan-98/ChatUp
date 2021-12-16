@@ -40,12 +40,12 @@ const sendAcceptFriendNotification = async (userId, senderId) => {
   const sender = await USER.findById(senderId);
   const user = await USER.findById(userId);
 
-  if (sender && user && user.notifications_subscriptions && user.notifications_subscriptions.length) {
-    user.notifications_subscriptions.forEach(subscription => {
+  if (sender && user && sender.notifications_subscriptions && sender.notifications_subscriptions.length) {
+    sender.notifications_subscriptions.forEach(subscription => {
       // Notification Payload
       const payload = JSON.stringify({
-        title: `${sender.username} accepted your friend request`,
-        body: `You can chat with ${sender.username} and see his diaries`,
+        title: `${user.username} accepted your friend request`,
+        body: `You can chat with ${user.username} and see his diaries`,
         image: "/imgs/chat-logo.png" 
       });
       

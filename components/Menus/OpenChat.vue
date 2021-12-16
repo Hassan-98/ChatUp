@@ -2119,7 +2119,7 @@ export default {
 
         }, 40 * 1000);
 
-      } else if (isOnGoingCall) {
+      } else if (isOnGoingCall && !this.$store.state.inCall) {
 
         const contact = this.chat;
 

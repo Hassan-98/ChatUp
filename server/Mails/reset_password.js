@@ -4,8 +4,8 @@ module.exports = ({ username, verifyLink }) => `
     <td align="center" style="padding:0;">
       <table role="presentation" style="width:602px;border-collapse:collapse;border:1px solid #cccccc;border-spacing:0;text-align:left;">
         <tr>
-          <td align="center" style="padding:10px 0 0;background:#1E3750;">
-            <img src="https://chatupapp.tk/imgs/chatLogoNothing-Dark.png" alt="" width="80" style="height:auto;display:block;" />
+          <td align="center" style="padding:10px 0 0;background:#1d2f41;">
+            <img src="https://chatupapp.tk/imgs/chatLogoNothing-Dark.png" alt="" width="70" style="height:auto;display:block;margin-top:5px" />
             <h2 style="font-family:Arial,sans-serif;color: #fff;margin-top:5px">ChatUp</h2>
           </td>
         </tr>
@@ -34,7 +34,7 @@ module.exports = ({ username, verifyLink }) => `
                 <td style="padding:0;width:50%;" align="right">
                   <table role="presentation" style="border-collapse:collapse;border:0;border-spacing:0;">
                     <tr>
-                      <td style="padding:0 0 0 10px;width:38px;">
+                      <td style="padding:0 0 0 10px;width:38px;direction:ltr">
                         <a href="http://chatupapp.tk/" style="color:#ffffff;"><img src="https://chatupapp.tk/imgs/chatLogoWhite.png" alt="ChatUp" width="38" style="height:auto;display:block;border:0;" /></a>
                       </td>
                     </tr>
