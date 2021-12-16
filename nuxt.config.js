@@ -16,7 +16,7 @@ module.exports = {
     ],
     script: [
       { src: 'https://code.responsivevoice.org/responsivevoice.js?key=J3mBT7fB', ssr: false },
-      { src: 'https://download.agora.io/sdk/release/AgoraRTC_N.js', ssr: false },
+      { src: '/js/AgoraRTC_N-4.7.3.js', ssr: false },
       { src: '/js/zuck.min.js', ssr: false },
       { src: '/js/recorder.js', ssr: false },
       { src: '/js/plyr.min.js', ssr: false }

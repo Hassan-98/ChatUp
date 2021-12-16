@@ -465,11 +465,9 @@ export default {
     async handleCallStart(channel){
       var options = { appId: process.env.AgoraAppID, channel };
 
-      window.client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+      window.client = AgoraRTC.createClient({ mode: "rtc", codec: "h264" });
 
-      const join = await client.join(options.appId, options.channel, null, null);
-
-      console.log(join)
+      await client.join(options.appId, options.channel, null, null);
       
       // Create an audio track from the audio sampled by a microphone.
       window.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
@@ -485,6 +483,7 @@ export default {
         if (mediaType === "audio") {
           // Get `RemoteAudioTrack` in the `user` object.
           const remoteAudioTrack = user.audioTrack;
+          console.log(remoteAudioTrack)
           // Play the audio track. No need to pass any DOM element.
           remoteAudioTrack.play();
         }
