@@ -465,12 +465,10 @@ export default {
     async handleCallStart(channel){
       var options = { appId: process.env.AgoraAppID, channel };
 
-      window.client = AgoraRTC.createClient({ mode: "rtc", codec: "h264" });
+      const client = AgoraRTC.createClient({ mode: "rtc", codec: "h264" });
+      window.client = client;
 
       await client.join(options.appId, options.channel, null, null);
-      
-      // Create an audio track from the audio sampled by a microphone.
-      window.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
 
       client.on("user-published", async (user, mediaType) => {
         // Subscribe to a remote user.
@@ -484,9 +482,18 @@ export default {
           remoteAudioTrack.play();
         }
       });
+      
+      // Create an audio track from the audio sampled by a microphone.
+      const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+      window.localAudioTrack = localAudioTrack;
 
       // Publish the local audio track to the channel.
       await client.publish([localAudioTrack]);
+
+      setTimeout(async () => {
+        // ReTry
+        await client.publish([localAudioTrack]);
+      }, 1000);
 
       // Keep Tracing The Network Quality
       client.on("network-quality", (stats) => {
