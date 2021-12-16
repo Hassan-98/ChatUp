@@ -24,7 +24,7 @@ module.exports = ({ username, verifyLink }) => `
         </tr>
         <tr>
           <td style="padding:30px;background:#ee4c50;">
-            <table role="presentation" style="width:100%;border-collapse:collapse;border:0;border-spacing:0;font-size:9px;font-family:Arial,sans-serif;">
+            <table role="presentation" style="width:100%;border-collapse:collapse;border:0;border-spacing:0;font-size:9px;font-family:Arial,sans-serif;direction:ltr">
               <tr>
                 <td style="padding:0;width:50%;" align="left">
                   <p style="margin:0;font-size:14px;line-height:16px;font-family:Arial,sans-serif;color:#ffffff;direction:ltr">

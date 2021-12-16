@@ -26,7 +26,7 @@ const sendFriendRequestNotification = async (userId, senderId) => {
       const payload = JSON.stringify({
         title: `New friend request from ${sender.username}`,
         body: "There is new request to checkout",
-        image: "/imgs/chat-logo.png" 
+        image: "/imgs/chatLogoDark.png" 
       });
       
       // Send A Notification To This User
@@ -46,7 +46,7 @@ const sendAcceptFriendNotification = async (userId, senderId) => {
       const payload = JSON.stringify({
         title: `${user.username} accepted your friend request`,
         body: `You can chat with ${user.username} and see his diaries`,
-        image: "/imgs/chat-logo.png" 
+        image: "/imgs/chatLogoDark.png" 
       });
       
       // Send A Notification To This User
@@ -68,7 +68,7 @@ const sendStoryNotification = async (friendsIDs, senderId) => {
         const payload = JSON.stringify({
           title: `${sender.username} added to his diaries`,
           body: `Go checkout ${sender.username}'s diaries`,
-          image: "/imgs/chat-logo.png" 
+          image: "/imgs/chatLogoDark.png" 
         });
         
         // Send A Notification To This User
@@ -82,13 +82,13 @@ const sendStoryNotification = async (friendsIDs, senderId) => {
 const sendMessageNotifications = (users, senderId, chat) => {
   const sender = users.find(user => user._id == senderId);
   users.forEach(user => {
-    if (user._id !== sender._id && user.notifications_subscriptions && user.notifications_subscriptions.length) {
+    if (user._id !== sender._id && !user.activeNow && user.notifications_subscriptions && user.notifications_subscriptions.length) {
       user.notifications_subscriptions.forEach(subscription => {
         // Notification Payload
         const payload = JSON.stringify({
           title: `New message from ${chat.roomType == "Chats" ? sender.username : chat.groupName}`,
           body: "There are new messages to checkout",
-          image: "/imgs/chat-logo.png" 
+          image: "/imgs/chatLogoDark.png" 
         });
         
         // Send A Notification To This User
