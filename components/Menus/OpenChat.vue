@@ -2030,9 +2030,9 @@ export default {
     async call(){
       const { $store, $socket } = this;
 
+      // Check Blocked User
       var idx = -1;
       if (this.chat.usersList.other) idx = this.currentUser.blockList.findIndex(user => user._id == chat.usersList.other._id);
-      
       if (idx > -1) return this.Toast.fire({ icon: 'error', title: 'You blocked this contact, go to settings to unblock' });
 
       // Block Call if user is not active
@@ -2043,9 +2043,8 @@ export default {
       const receiverID = this.chat.usersList.other ? this.chat.usersList.other._id : this.chat._id;
       const contactType = this.chat.usersList.other ? "user" : "group"
 
-      if (contactType == "group") {
-        return $socket.emit("isOnGoingCall", { groupID: receiverID });
-      };
+      // If The Chat is Group => Send 'isOnGoingCall' Check to server
+      if (contactType == "group") { return $socket.emit("isOnGoingCall", { groupID: receiverID }); };
 
       const call_info = {
         callerUserID: this.currentUser._id,

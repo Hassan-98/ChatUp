@@ -203,6 +203,15 @@
 import moment from 'moment'
 /* eslint-disable */
 export default {
+  data() {
+    return {
+      Toast: Swal.mixin({
+        toast: true,
+        showConfirmButton: false,
+        timer: 5000
+      }),
+    }
+  },
   computed: {
     openUser () {
       return this.$store.state.OptionalMenuUser
@@ -230,33 +239,26 @@ export default {
       this.$store.commit('closeOpMenu')
     },
     async sendFriendRequest (e, id) {
-      var element
-      if (e.target.tagName == 'I') element = e.target.parentElement
-      else element = e.target
-      element.innerHTML = this.$store.state.loadingElement
-      const res = await this.$axios.$post(`/api/users/friendRequest/${this.cUser._id}?id=${id}`)
-      if (res.err) {
-        Swal.fire({
-          toast: true,
-          icon: 'error',
-          title: res.err,
-        })
-      } else {
+      var element;
+      if (e.target.tagName == 'I') element = e.target.parentElement;
+      else element = e.target;
 
-        const senderContact = {
-          _id: this.cUser._id,
-          username: this.cUser.username,
-          photo: this.cUser.photo,
-        }
+      element.innerHTML = this.$store.state.loadingElement;
 
-        this.$socket.emit('sendFriendRequest', { targetedContactID: this.openUser._id, senderContact })
+      const {err} = await this.$axios.$post(`/api/users/friendRequest/${this.cUser._id}?id=${id}`)
 
-        Swal.fire({
-            toast: true,
-            icon: 'success',
-            title: `Friend Request Sent To ${this.openUser.username}`
-        });
+      if (err) return this.Toast.fire({ icon: 'error', title: err, })
+        
+      const senderContact = {
+        _id: this.cUser._id,
+        username: this.cUser.username,
+        photo: this.cUser.photo,
       }
+
+      this.$socket.emit('sendFriendRequest', { targetedContactID: this.openUser._id, senderContact })
+
+      this.Toast.fire({ icon: 'success', title: `Friend Request Sent To ${this.openUser.username}` });
+
       element.innerHTML = `<i class="fad fa-user-plus"></i> Add`
     },
     async block (e, id) {
@@ -267,43 +269,32 @@ export default {
       else element = e.target
 
       element.innerHTML = this.$store.state.loadingElement;
-      const res = await $axios.$post(`/api/users/block/${cUser._id}?id=${id}`);
+      
+      const {err, user} = await $axios.$post(`/api/users/block/${cUser._id}?id=${id}`);
 
-      if (res.err) {
-        Swal.fire({
-          toast: true,
-          icon: 'error',
-          title: res.err,
-        })
-      } else {
+      if (err)  return this.Toast.fire({ icon: 'error', title: err, })
         
-        $store.commit('setUser', res.user);
+      $store.commit('setUser', user);
 
-        Swal.fire({
-            toast: true,
-            icon: 'success',
-            title: `${openUser.username} has been added to your blocklist`
-        });
-      }
+      this.Toast.fire({ icon: 'success', title: `${openUser.username} has been added to your blocklist` });
+      
       element.innerHTML = '<i class="fad fa-user-lock"></i> Block'
     },
     async startChat (e, id) {
-      var element
-      if (e.target.tagName == 'I') element = e.target.parentElement
-      else element = e.target
+      var element;
+      if (e.target.tagName == 'I') element = e.target.parentElement;
+      else element = e.target;
 
-      element.innerHTML = this.$store.state.loadingElement
-      const { cUser, openUser, $axios, $store, $socket } = this
-      const res = await $axios.$post(`/api/chats/${cUser._id}?userTo=${id}`)
+      element.innerHTML = this.$store.state.loadingElement;
 
-      if (res.err) {
-        Swal.fire({
-          toast: true,
-          icon: 'error',
-          title: res.err,
-        })
-      } else if (!res.found) {
-        var chatObj = res.chat;
+      const { cUser, openUser, $axios, $store, $socket } = this;
+
+      const {err, found, chat} = await $axios.$post(`/api/chats/${cUser._id}?userTo=${id}`)
+
+      if (err) return this.Toast.fire({ icon: 'error', title: err, })
+      
+      if (!found) {
+        var chatObj = chat;
 
         chatObj.lastOneNotSeen = false;
 
@@ -341,23 +332,20 @@ export default {
 
         this.$forceUpdate();
 
-        Swal.fire({
-            toast: true,
-            icon: 'success',
-            title: `A new chat with ${openUser.username} has been created`
-        });
+        this.Toast.fire({ icon: 'success', title: `A new chat with ${openUser.username} has been created` });
       } else {
-        var chat = $store.state.chats.find(Chat => Chat._id == res.chat._id);
+        var Chat = $store.state.chats.find(ChatObj => ChatObj._id == chat._id);
 
-        chat.lastOneNotSeen = false;
+        Chat.lastOneNotSeen = false;
 
-        $store.commit('openChat', chat);
+        $store.commit('openChat', Chat);
 
         $store.commit('changeMenu', "Chats");
 
         document.querySelectorAll('.main-sidebar-btns').forEach((btn) => btn.classList.remove('active'));
         document.querySelector(".main-sidebar-btns[title='Chats']")?.classList.add('active');
       }
+
       element.innerHTML = '<i class="fad fa-comment-alt-lines mr-1"></i> Message';
     },
     openSettings () {
@@ -368,10 +356,6 @@ export default {
     }
   },
   filters: {
-    isURL (v) {
-      var reg = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/gm
-      return reg.test(v)
-    },
     formatJoinedAt (v) {
       return moment(v).format("YYYY-MM-DD")
     }
