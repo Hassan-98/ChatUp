@@ -11,8 +11,8 @@
         <h4 @click="openProfile(friend)">
           {{ friend.username }}
         </h4>
-        <i v-tooltip="'Remove friend'" class="fal fa-user-times" @click="removeFriend(friend._id, friend.username)" />
-        <i v-tooltip="'Send message'" class="fal fa-comment-dots" @click="startChat(friend._id)" />
+        <i v-tooltip="'Remove friend'" class="fal fa-user-times" @click="removeFriend($event, friend._id, friend.username)" />
+        <i v-tooltip="'Send message'" class="fal fa-comment-dots" @click="startChat($event, friend._id)" />
       </div>
     </div>
   </div>
@@ -140,7 +140,12 @@
 export default {
   data () {
     return {
-      searchTxt: ''
+      searchTxt: '',
+      Toast: Swal.mixin({
+        toast: true,
+        showConfirmButton: false,
+        timer: 5000
+      }),
     }
   },
   computed: {
@@ -157,7 +162,11 @@ export default {
       this.$store.commit('openOpMenu', user)
       this.$store.commit('closeModal');
     },
-    async removeFriend (id, username) {
+    async removeFriend (e, id, username) {
+      e.target.innerHTML = this.$store.state.loadingElement;
+      e.target.classList.remove("fal");
+      e.target.classList.remove("fa-user-times");
+
       const { $socket, $axios, currentUser } = this;
 
       Swal.fire({
@@ -170,42 +179,45 @@ export default {
         confirmButtonText: 'Remove'
       }).then(async (result) => {
         if (result.value) {
-          const res = await $axios.$delete(`/api/users/friends/${currentUser._id}?freindId=${id}`);
+          const {err} = await $axios.$delete(`/api/users/friends/${currentUser._id}?freindId=${id}`);
 
-          if(res.err) {
-            return Swal.fire({
-              toast: true,
-              icon: 'error',
-              title: res.err,
-            });
-          } else {
-            $socket.emit('removeContact', {contactID: id});
-
-            Swal.fire({
-              toast: true,
-              icon: 'success',
-              title: `${username} has been removed from your friends`
-            });
-
+          if(err) {
+            return this.Toast.fire({ icon: 'error', title: err, });
           }
+          
+          $socket.emit('removeContact', {contactID: id});
+
+          this.Toast.fire({
+            icon: 'success',
+            title: `${username} has been removed from your friends`
+          });
         }
+        
+        e.target.innerHTML = "";
+        e.target.classList.add("fal");
+        e.target.classList.add("fa-user-times");
       })
     },
     search() {
       var username = new RegExp(this.searchTxt, 'i')
       this.friendsList = this.currentUser.friendsList.filter(friend => friend.username.search(username) > -1)
     },
-    async startChat (id) {
-      const { currentUser, $axios, $store, $socket } = this
-      const res = await $axios.$post(`/api/chats/${currentUser._id}?userTo=${id}`)
+    async startChat (e, id) {
+      e.target.innerHTML = this.$store.state.loadingElement;
+      e.target.classList.remove("fal");
+      e.target.classList.remove("fa-comment-dots");
 
-      if (res.err) {
-        return Swal.fire({
-          toast: true,
-          icon: 'error',
-          title: res.err,
-        });
-      } else if (!res.found) {
+      const { currentUser, $axios, $store, $socket } = this
+      const {err, found, chat} = await $axios.$post(`/api/chats/${currentUser._id}?userTo=${id}`)
+
+      if (err) {
+        e.target.innerHTML = "";
+        e.target.classList.add("fal");
+        e.target.classList.add("fa-comment-dots");
+        return this.Toast.fire({ icon: 'error', title: err, });
+      }
+
+      if (!found) {
           var chatObj = res.chat;
 
           chatObj.lastOneNotSeen = false;
@@ -236,11 +248,19 @@ export default {
           }
 
           setTimeout(() => $store.commit('closeModal'), 20);
+          
+          e.target.innerHTML = "";
+          e.target.classList.add("fal");
+          e.target.classList.add("fa-comment-dots");
       } else {
-        var chat = $store.state.chats.find(room => room._id == res.chat._id)
-        chat.lastOneNotSeen = false;
-        $store.commit('openChat', chat);
+        var Chat = $store.state.chats.find(room => room._id == chat._id)
+        Chat.lastOneNotSeen = false;
+        $store.commit('openChat', Chat);
         $store.commit('closeModal');
+
+        e.target.innerHTML = "";
+        e.target.classList.add("fal");
+        e.target.classList.add("fa-comment-dots");
       }
     }
   }

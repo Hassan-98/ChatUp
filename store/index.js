@@ -16,7 +16,7 @@ export default () => {
       desktop: true,
       noChatOpen: true,
       openSetting: 'GeneralSettings',
-      loadingElement: `<i class="fad fa-spinner-third loadingState"></i>`,
+      loadingElement: `<div class="button_loader"><div class="lds-ring"><div></div><div></div><div></div><div></div></div></div>`,
       user: null,
       OptionalMenuUser: { photo: 'Error', username: 'Error', aboutMe: 'Error', phone: 'Error', address: 'Error', website: 'Error', friendsList: [] },
       chats: [],

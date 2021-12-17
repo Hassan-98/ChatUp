@@ -108,6 +108,15 @@
 <script>
 /* eslint-disable */
 export default {
+  data() {
+    return {
+      Toast: Swal.mixin({
+        toast: true,
+        showConfirmButton: false,
+        timer: 5000
+      }),
+    }
+  },
   computed: {
     currentUser () {
       return this.$store.state.user || false
@@ -120,24 +129,24 @@ export default {
       this.$store.commit('closeModal');
     },
     async unBlock (e, id, username) {
-      const { currentUser, $axios, $store } = this
-      const res = await $axios.$post(`/api/users/unblock/${currentUser._id}?id=${id}`)
-      if (res.err) {
-        Swal.fire({
-          toast: true,
-          icon: 'error',
-          title: res.err
-        })
-      } else {
-        $store.commit('setUser', res.user);
+      e.target.innerHTML = this.$store.state.loadingElement;
+      e.target.classList.remove("fal");
+      e.target.classList.remove("fa-user-slash");
 
-        Swal.fire({
-            toast: true,
-            icon: 'success',
-            title: `${username} has been removed from blocklist`
-        });
-      }
-    },
+      const { currentUser, $axios, $store } = this;
+
+      const {err, user} = await $axios.$post(`/api/users/unblock/${currentUser._id}?id=${id}`);
+
+      if (err) return this.Toast.fire({ icon: 'error', title: err });
+
+      $store.commit('setUser', user);
+
+      this.Toast.fire({ icon: 'success', title: `${username} has been removed from blocklist` });
+      
+      e.target.innerHTML = "";
+      e.target.classList.add("fal");
+      e.target.classList.add("fa-user-slash");
+    }
   }
 }
 </script>

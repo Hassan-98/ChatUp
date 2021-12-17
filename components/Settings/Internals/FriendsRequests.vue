@@ -10,7 +10,7 @@
         <h4 @click="openProfile(friendRequest)">
           {{ friendRequest.username }}
         </h4>
-        <i v-tooltip="'Accept request'" class="fal fa-user-check" @click="accept(friendRequest._id, friendRequest.username)" />
+        <i v-tooltip="'Accept request'" class="fal fa-user-check" @click="accept($event, friendRequest._id, friendRequest.username)" />
       </div>
     </div>
   </div>
@@ -111,6 +111,15 @@
 <script>
 /* eslint-disable */
 export default {
+  data() {
+    return {
+      Toast: Swal.mixin({
+        toast: true,
+        showConfirmButton: false,
+        timer: 5000
+      }),
+    }
+  },
   computed: {
     currentUser () {
       return this.$store.state.user || false
@@ -122,37 +131,39 @@ export default {
       this.$store.commit('openOpMenu', user);
       this.$store.commit('closeModal');
     },
-    async accept (id, username) {
+    async accept (e, id, username) {
+      e.target.innerHTML = this.$store.state.loadingElement;
+      e.target.classList.remove("fal");
+      e.target.classList.remove("fa-user-check");
+
       const { $store, $socket, $axios, currentUser } = this;
 
-      const res = await $axios.$post(`/api/users/friends/${currentUser._id}?reqId=${id}`)
+      const {err, user} = await $axios.$post(`/api/users/friends/${currentUser._id}?reqId=${id}`)
 
-      if(res.err) {
-        return Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: res.err
-        })
-      } else {
-        const contact = {
-          _id: res.user._id,
-          username: res.user.username,
-          email: res.user.email,
-          photo: res.user.photo,
-          stories: res.user.stories,
-        }
-
-        $socket.emit('acceptFriendRequest', {contact, friendID: id});
-
-        $store.commit('setUser', res.user);
-
-        Swal.fire({
-            toast: true,
-            icon: 'success',
-            title: `${username} has been added as a friend`
-        });
-
+      if(err) {
+        e.target.innerHTML = "";
+        e.target.classList.add("fal");
+        e.target.classList.add("fa-user-check");
+        return this.Toast.fire({ icon: 'error', title: err })
       }
+
+      const contact = {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        photo: user.photo,
+        stories: user.stories,
+      }
+
+      $socket.emit('acceptFriendRequest', {contact, friendID: id});
+
+      $store.commit('setUser', user);
+
+      this.Toast.fire({ icon: 'success', title: `${username} has been added as a friend` });
+
+      e.target.innerHTML = "";
+      e.target.classList.add("fal");
+      e.target.classList.add("fa-user-check");
     }
   }
 }

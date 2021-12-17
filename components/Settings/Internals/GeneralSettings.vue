@@ -73,7 +73,7 @@
     <span class="input input-file">
       <div class="avatar-image changable">
         <img :src="currentUser.photo" alt="user">
-        <span v-tooltip="'Change Picture'" class="overlay" @click="openProfilePictureEditor">
+        <span v-if="!isGoogleUser" v-tooltip="'Change Picture'" class="overlay" @click="openProfilePictureEditor">
           <i class="fad fa-camera-alt" />
         </span>
       </div>
