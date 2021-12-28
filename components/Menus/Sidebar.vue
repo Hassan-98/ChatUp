@@ -135,6 +135,8 @@ export default {
         document.documentElement.style.setProperty('--borders', '#051e345c')
         document.documentElement.style.setProperty('--bg-nothing', '#11254A')
         document.documentElement.style.setProperty('--buttons', '#BAC1C7');
+        document.documentElement.style.setProperty('--msgsBg', '#333D48');
+        document.documentElement.style.setProperty('--msgsTxt', '#fff');
         if (nothingLogo) nothingLogo.src = '/imgs/chatLogoNothing-Dark.png';
       } else {
         localStorage.setItem('darkMode', 'OFF')
@@ -146,6 +148,8 @@ export default {
         document.documentElement.style.setProperty('--borders', '#e9e9e9')
         document.documentElement.style.setProperty('--bg-nothing', '#fff')
         document.documentElement.style.setProperty('--buttons', '#dae0e5')
+        document.documentElement.style.setProperty('--msgsBg', '#f4f7fc');
+        document.documentElement.style.setProperty('--msgsTxt', '#212529');
         document.documentElement.style.setProperty('--open-bg', 'url(https://www.toptal.com/designers/subtlepatterns/patterns/so-white.png)')
         if (nothingLogo) nothingLogo.src = '/imgs/chatLogoNothing-Light.png';
       }

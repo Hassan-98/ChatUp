@@ -95,7 +95,7 @@
               </span>
               <!-- ReplyTo -->
 
-              {{ message.msg }}
+              <span class="text">{{ message.msg }}</span>
             </p>
             <p v-if="message.deleted" class="deleted">
               <i class="far fa-times" />
@@ -124,7 +124,10 @@
               <div class="iconOfFile">
                 <div class="file-icon" :data-type="message.file | formatMimetype" />
               </div>
-              <span @click="downloadOrPreviewFile(message.file)">{{ message.file | cutOff }}</span>
+              <span v-if="formatIsImage(message.file)" @click="downloadOrPreviewFile(message.file)">
+                <img :src="message.file" alt="message image" />
+              </span>
+              <span v-else @click="downloadOrPreviewFile(message.file)">{{ message.file | cutOff }}</span>
             </div>
             <!-- FILE MESSAGE -->
 
@@ -567,15 +570,22 @@
               margin: 0;
               display: inline-block;
               font-size: 16px;
-              background: #F4F7FC;
-              color: #212529;
-              padding: 4px 15px;
+              background: var(--msgsBg);
+              color: var(--msgsTxt);
+              padding: 4px 10px;
               border-radius: 10px;
               box-shadow: none;
               box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
               max-width: 300px;
               @include sm {
                 max-width: 240px;
+              }
+              span.text {
+                padding: 0 5px;
+                margin: 0;
+                font-size: 16px;
+                font-family: 'Tajawal', sans-serif;
+                overflow: hidden;
               }
               &.deleted {
                 color: #999;
@@ -601,21 +611,18 @@
                 z-index: -1;
                 top: -2px;
                 border-radius: 5px;
-                &.fullwidth {
-                  width: 100%;
-                }
                 span.user {
                   padding: 0 5px;
                   font-size: 13px;
                   margin: 5px 0!important;
                   font-weight: bold;
-                  color: #1e3750;
+                  color: var(--mc);
                 }
                 span.content {
                   direction: rtl;
                   unicode-bidi: plaintext;
                   border-radius: 5px;
-                  padding: 7px 15px;
+                  padding: 3px 10px;
                   border: none;
                   width: 100%;
                   margin: 0;
@@ -623,7 +630,11 @@
                   background: #e9e9e952;
                   color: #1e3750;
                   font-family: 'Tajawal', sans-serif;
-                  max-width: 350px;
+                  max-width: 290px;
+                  overflow: hidden;
+                }
+                &.fullwidth {
+                  width: 100%;
                 }
               }
               #text {
@@ -682,6 +693,9 @@
 
               .replyTo {
                 background: #f5f7f9ab;
+                span.user {
+                  color: #1e3750;
+                }
                 span.content {
                   background: #e9e9e952;
                   text-align: right;
@@ -731,7 +745,7 @@
               overflow: hidden;
               & > i {
                 padding: 10px;
-                background: #e9ebef;
+                background: var(--msgsBg);
                 font-size: 20px;
                 &.missed {
                   color: #bb0000;
@@ -742,16 +756,13 @@
                 font-family: 'Tajawal', sans-serif;
                 margin: 0;
                 font-size: 16px;
-                background: #F4F7FC;
-                color: #212529;
+                background: var(--msgsBg);
+                color: var(--msgsTxt);
                 border-radius: 0 7px 7px 0;
                 font-weight: bold;
                 line-height: 20px;
                 i {
                   font-size: 14px;
-                }
-                &:hover {
-                  background: #F4F7FC;
                 }
                 @include sm {
                   padding: 12px 10px 8px;
@@ -775,9 +786,6 @@
                 color: #fff;
                 background: var(--msgs);
                 border-radius: 7px 0 0 7px;
-                &:hover {
-                  background: #1e3750eb;
-                }
               }
             }
           }
@@ -854,7 +862,7 @@
               overflow: hidden;
               & > i {
                 padding: 10px;
-                background: #e9ebef;
+                background: var(--msgsBg);
                 font-size: 20px;
               }
               span {
@@ -862,17 +870,14 @@
                 font-family: 'Tajawal', sans-serif;
                 margin: 0;
                 font-size: 16px;
-                background: #F4F7FC;
-                color: #212529;
+                background: var(--msgsBg);
+                color: var(--msgsTxt);
                 cursor: pointer;
                 border-radius: 0 7px 7px 0;
                 font-weight: bold;
                 line-height: 20px;
                 i {
                   font-size: 14px;
-                }
-                &:hover {
-                  background: #F4F7FC;
                 }
                 @include sm {
                   padding: 12px 10px 8px;
@@ -904,9 +909,6 @@
                 color: #fff;
                 background: var(--msgs);
                 border-radius: 7px 0 0 7px;
-                &:hover {
-                  background: #1e3750eb;
-                }
               }
             }
           }
@@ -982,7 +984,8 @@
               border-radius: 7px;
               & > i {
                 padding: 19px 10px 10px;
-                background: #e9ebef;
+                background: var(--msgsBg);
+                color: var(--msgsTxt);
                 font-size: 20px;
                 border-radius: 7px 0 0 7px;
                 &.playRecord, &.pauseRecord {
@@ -1002,16 +1005,13 @@
                 font-family: 'Tajawal', sans-serif;
                 margin: 0;
                 font-size: 16px;
-                background: #F4F7FC;
-                color: #212529;
+                background: var(--msgsBg);
+                color: var(--msgsTxt);
                 cursor: pointer;
                 border-radius: 0;
                 font-weight: bold;
                 i {
                   font-size: 14px;
-                }
-                &:hover {
-                  background: #e9ebef;
                 }
               }
               .plyr--audio{
@@ -1054,9 +1054,6 @@
                 color: #fff;
                 background: var(--msgs);
                 border-radius: 0;
-                &:hover {
-                  background: #1e3750eb;
-                }
               }
             }
           }
@@ -1133,31 +1130,33 @@
               border-radius: 7px;
               overflow: hidden;
               .iconOfFile {
-                padding: 4px 5px 0 5px;
-                background: #e9ebef;
+                padding: 10px 10px 10px 0;
+                background: var(--msgsBg);
                 font-size: 20px;
                 .file-icon {
                   &::before {
-                      border-color: #e9ebef #e9ebef rgba(255,255,255,.35) rgba(255,255,255,.35);
+                      border-color: var(--msgsBg) var(--msgsBg) rgba(255,255,255,.35) rgba(255,255,255,.35);
                   }
                 }
               }
               & > span {
                 direction: ltr;
                 padding: 10px;
+                line-height: 35px;
                 font-family: 'Tajawal', sans-serif;
                 margin: 0;
                 font-size: 16px;
-                background: #F4F7FC;
-                color: #212529;
+                background: var(--msgsBg);
+                color: var(--msgsTxt);
                 cursor: pointer;
                 border-radius: 0 7px 7px 0;
                 font-weight: bold;
                 i {
                   font-size: 14px;
                 }
-                &:hover {
-                  background: #e9ebef;
+                img {
+                  max-width: 300px;
+                  border-radius: 10px;
                 }
                 @include sm {
                   padding: 12px 10px 8px;
@@ -1186,7 +1185,7 @@
                 background: #1e3750eb;
                 .file-icon {
                   &::before {
-                      border-color: #30475e #30475e rgba(255, 255, 255, 0.35) rgba(255, 255, 255, 0.35);
+                      border-color: #1E374F #1E374F rgba(255, 255, 255, 0.35) rgba(255, 255, 255, 0.35);
                   }
                 }
               }
@@ -1863,7 +1862,8 @@ export default {
       var filename = NameArr.join("_")
       var splited = filename.split('.');
       var ext = splited[splited.length - 1];
-      if (ext == 'png' || ext == "jpg" || ext == "jpeg" || ext == "gif" || ext == "svg" ||ext == 'bmp') {
+      const images = ['png', "jpg", "jpeg", "gif", "svg", "bmp"]
+      if (images.indexOf(ext) !== -1) {
         this.$store.commit('openPicModal', file)
       } else {
         this.download(file.filename, file)
@@ -1872,6 +1872,7 @@ export default {
     download(filename, URL) {
       var element = document.createElement('a');
       element.setAttribute('href', URL);
+      element.setAttribute('target', "_blank");
       element.setAttribute('download', filename);
       element.style.display = 'none';
       document.body.appendChild(element);
@@ -2106,6 +2107,30 @@ export default {
       Object.values(this.chat.usersList).forEach(user => {
         if (user._id == this.currentUser._id) this.$store.commit('openEditGroupModal')
       })
+    },
+    formatIsImage(file) {
+      var splitedName = file.split("/");
+      var name = splitedName[splitedName.length - 1]
+      var lastName = name.split("_")
+      var NameArr = []
+      lastName.forEach((part, idx) => {if (idx == lastName.length - 1) return; NameArr.push(part)})
+      var filename = NameArr.join("_")
+      var splited = filename.split('.');
+      var ext = splited[splited.length - 1];
+      switch (ext) {
+        case "png":
+          return true;
+        case "jpg":
+          return true;
+        case "jpeg":
+          return true;
+        case "svg":
+          return true;
+        case "gif":
+          return true;
+        default:
+          return false;
+      }
     }
   },
   sockets: {
