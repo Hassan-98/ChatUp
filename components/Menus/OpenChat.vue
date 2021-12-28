@@ -632,6 +632,9 @@
                   font-family: 'Tajawal', sans-serif;
                   max-width: 290px;
                   overflow: hidden;
+                  @include sm {
+                    max-width: 230px;
+                  }
                 }
                 &.fullwidth {
                   width: 100%;
@@ -1130,7 +1133,7 @@
               border-radius: 7px;
               overflow: hidden;
               .iconOfFile {
-                padding: 10px 10px 10px 0;
+                padding: 10px 0 10px 10px;
                 background: var(--msgsBg);
                 font-size: 20px;
                 .file-icon {
@@ -1157,6 +1160,9 @@
                 img {
                   max-width: 300px;
                   border-radius: 10px;
+                  @include sm {
+                    max-width: 240px;
+                  }
                 }
                 @include sm {
                   padding: 12px 10px 8px;
@@ -1183,6 +1189,7 @@
               .iconOfFile {
                 color: #fff;
                 background: #1e3750eb;
+                padding: 10px 10px 10px 0;
                 .file-icon {
                   &::before {
                       border-color: #1E374F #1E374F rgba(255, 255, 255, 0.35) rgba(255, 255, 255, 0.35);
