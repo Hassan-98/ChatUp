@@ -244,7 +244,6 @@
               color: red;
               font-size: 8px;
               margin-left: 5px;
-              margin-top: 10px;
             }
           }
         }

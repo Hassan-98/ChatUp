@@ -586,6 +586,7 @@
                 font-size: 16px;
                 font-family: 'Tajawal', sans-serif;
                 overflow: hidden;
+                color: var(--mc);
               }
               &.deleted {
                 color: #999;
@@ -665,7 +666,7 @@
                 }
               }
               @include xs {
-                padding: 8px 15px 3px;
+                padding: 6px 15px;
               }
             }
             span {
@@ -693,6 +694,10 @@
             p {
               background: var(--msgs);
               color: #fff;
+
+              span.text {
+                color: #F5F7F9;
+              }
 
               .replyTo {
                 background: #f5f7f9ab;
