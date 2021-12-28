@@ -24,6 +24,9 @@
       background: rgba($color: #000, $alpha: 0.5);
       width: 75%;
       height: 90%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       @include xl {
         width: 95%;
         height: 95%;
@@ -59,7 +62,7 @@
       }
       img{
         width: auto;
-        height: 100%;
+        height: auto;
       }
     }
   }
