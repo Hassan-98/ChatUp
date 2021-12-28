@@ -58,10 +58,22 @@
               {{ Object.keys(chat.usersList).length }} Members
             </p>
           </div>
-          <i v-if="$store.state.mobile" v-tooltip="'Back'" class="fa-thin fa-arrow-left-long" @click="closeChat" style="font-size: 22px; position: relative; top: 2px;right: 5px" />
+          <i
+            v-if="$store.state.mobile"
+            v-tooltip="'Back'"
+            class="fa-thin fa-arrow-left-long"
+            style="font-size: 22px; position: relative;right: 5px"
+            @click="closeChat"
+          />
           <i v-tooltip="'Start a call'" class="fa-duotone fa-circle-phone-flip" @click="call" />
-          <i v-tooltip="'Settings'" v-if="chat.usersList.other" class="fa-thin fa-bars" @click="openProfile(chat.usersList.other)" style="font-size: 24px; margin-left: 10px"></i>
-          <i v-tooltip="'Settings'" v-else class="fa-thin fa-bars" @click="openGroupSettings" style="font-size: 24px; margin-left: 10px"></i>
+          <i
+            v-if="chat.usersList.other"
+            v-tooltip="'Settings'"
+            class="fa-thin fa-bars"
+            style="font-size: 24px; margin-left: 10px"
+            @click="openProfile(chat.usersList.other)"
+          />
+          <i v-else v-tooltip="'Settings'" class="fa-thin fa-bars" style="font-size: 24px; margin-left: 10px" @click="openGroupSettings" />
         </div>
       </div>
       <div class="chat-body" @scroll="scrolling" @click="closeAllModals">
@@ -80,14 +92,13 @@
           <img :src="message.user.photo" alt="chat-img" @click="openProfile(message.user)">
 
           <div class="content">
-
             <!-- NORMAL MESSAGE -->
             <p
               v-if="message.msg.length > 0 && !message.deleted"
               :id="message._id"
               :class="(message.replyTo && message.replyTo.user) && 'act_to_replay'"
-              @dblclick="openReplayMsg(message.msg, message._id, message.user.username, message.user._id)">
-
+              @dblclick="openReplayMsg(message.msg, message._id, message.user.username, message.user._id)"
+            >
               <!-- ReplyTo -->
               <span v-if="!message.deleted && message.replyTo && message.replyTo.user" :id="message.replyTo.messageId" :class="message.msg.length >= message.replyTo.messageContent.length - 5 ? 'replyTo fullwidth' : 'replyTo'">
                 <span class="user">{{ message.replyTo.user.username }}</span>
@@ -106,7 +117,7 @@
             <!-- VOICE CALL MESSAGE -->
             <div v-if="message.voiceCall && !message.deleted" :id="message._id" class="voiceCall-content" @dblclick="openReplayMsg('Voice Call', message._id, message.user.username, message.user._id)">
               <i v-if="message.voiceCall.missed" class="fa-solid fa-phone-missed missed" />
-              <i v-else class="fa-solid fa-phone-arrow-up-right"></i>
+              <i v-else class="fa-solid fa-phone-arrow-up-right" />
               <span v-if="message.voiceCall.missed">Missed Voice Call</span>
               <span v-else>Voice Call <i>({{ message.voiceCall.duration | formatCallDuration }})</i></span>
             </div>
@@ -124,8 +135,8 @@
               <div class="iconOfFile">
                 <div class="file-icon" :data-type="message.file | formatMimetype" />
               </div>
-              <span v-if="formatIsImage(message.file)" @click="downloadOrPreviewFile(message.file)">
-                <img :src="message.file" alt="message image" />
+              <span v-if="formatIsImage(message.file)">
+                <img :src="message.file" alt="message image" @click="downloadOrPreviewFile(message.file)">
               </span>
               <span v-else @click="downloadOrPreviewFile(message.file)">{{ message.file | cutOff }}</span>
             </div>
@@ -153,7 +164,7 @@
             <!-- RECORD MESSAGE -->
 
             <!-- MESSAGE MENU -->
-            <i v-if="!message.deleted" class="fas fa-ellipsis-v" :class="(message.replyTo && message.replyTo.user) && 'act_to_replay'">
+            <i v-if="!message.deleted" class="fa-solid fa-ellipsis-vertical" :class="(message.replyTo && message.replyTo.user) && 'act_to_replay'">
               <ul class="options-menu">
                 <li v-if="message.msg.length" @click="translateText($event, message.msg, currentUser.defaultLanguage, message.replyTo && message.replyTo.user)">
                   <i class="fal fa-language" /> Translate
@@ -517,22 +528,23 @@
 
           .content {
             width: 100%;
+            position: relative;
             & > i {
               display: inline;
               font-size: 13px;
-              color: rgb(135, 134, 134);
+              color: #878686;
               cursor: pointer;
-              position: relative;
-              &.act_to_replay {
-                top: -10px;
-              }
+              position: absolute;
+              top: 35%;
+              transform: translate(5px, -50%);
+              z-index: 999999999999;
               .options-menu {
                 border-radius: 8px;
                 overflow: hidden;
                 direction: ltr;
                 display: none;
                 position: absolute;
-                z-index: 9999999999999999;
+                z-index: 99999999999999;
                 top: -80px;
                 padding: 0;
                 left: calc(100% + 5px);
@@ -540,6 +552,10 @@
                 list-style: none;
                 background: var(--white);
                 box-shadow: 0 0 3px rgba($color: #000000, $alpha: 0.15);
+                @include xs {
+                  left: unset;
+                  right: calc(100% + 5px);
+                }
                 &.show {
                   display: inline-block;
                 }
@@ -601,7 +617,7 @@
               &.act_to_replay {
                 position: relative;
                 z-index: 1;
-                top: -10px;
+                top: 0px;
                 padding: 2px 5px 8px;
               }
               .replyTo {
@@ -681,9 +697,15 @@
             text-align: right;
             .content {
               & > i {
+              transform: translate(-5px, -50%);
                 .options-menu {
                   right: calc(100% + 5px);
                   top: -120px;
+                  @include xs {
+                    right: unset;
+                    top: -60px;
+                    left: calc(100% + 5px);
+                  }
                 }
               }
             }
@@ -1156,7 +1178,6 @@
                 font-size: 16px;
                 background: var(--msgsBg);
                 color: var(--msgsTxt);
-                cursor: pointer;
                 border-radius: 0 7px 7px 0;
                 font-weight: bold;
                 i {
@@ -1165,8 +1186,12 @@
                 img {
                   max-width: 300px;
                   border-radius: 10px;
+                  cursor: pointer;
                   @include sm {
                     max-width: 240px;
+                  }
+                  @include xs {
+                    max-width: 200px;
                   }
                 }
                 @include sm {
@@ -1205,9 +1230,6 @@
                 color: #fff;
                 background: var(--msgs);
                 border-radius: 7px 0 0 7px;
-                &:hover {
-                  background: #1e3750eb;
-                }
               }
             }
           }

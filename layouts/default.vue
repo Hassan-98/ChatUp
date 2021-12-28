@@ -55,7 +55,7 @@ export default {
       document.querySelectorAll('.options-menu').forEach((element) => {
         element.classList.remove("show")
       })
-      if (e.target.classList.contains('fa-ellipsis-v')) {
+      if (e.target.classList.contains('fa-ellipsis-vertical')) {
         const menu = e.target.querySelector('.options-menu')
         if (menu.classList.contains("show")) return;
         menu.classList.add("show");
