@@ -79,7 +79,7 @@
             position: fixed;
             height: 90%;
             width: 250px;
-            background-color: #fff;
+            background: var(--msgsBg);
             left: 2.5%;
             top: 5%;
             padding: 0;
@@ -117,13 +117,10 @@
                 margin: 0;
                 flex: 0 0 100%;
                 color: var(--mc);
+                background: var(--msgsBg);
                 border: none;
-                background: #fff;
                 box-shadow: none;
-                border: 1px solid transparent;
-                border-left: 1px solid #f6f6f6;
-                border-right: 0!important;
-                border-top: 0!important;
+                border: 0!important;
                 &:first-of-type {
                   border-left: 0!important;
                 }
@@ -139,7 +136,6 @@
                 }
                 &:hover, &.active {
                   &:not(:first-of-type) {
-                    border: 1px solid #f6f6f6;
                     transform: none;
                     background: var(--bg);
                     color: var(--mc);
