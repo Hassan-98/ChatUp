@@ -1193,7 +1193,7 @@
             .file-content {
               .iconOfFile {
                 color: #fff;
-                background: #1e3750eb;
+                background: #1e3750;
                 padding: 10px 10px 10px 0;
                 .file-icon {
                   &::before {
