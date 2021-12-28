@@ -21,7 +21,7 @@
             </button>
             <button class="requestsListBtn" @click="open($event, 'FriendsRequests')">
               <i class="fal fa-bells" />
-              <span>Friend</span> Requests
+              Friend Requests
             </button>
             <button @click="open($event, 'BlockList')">
               <i class="fal fa-ban" />

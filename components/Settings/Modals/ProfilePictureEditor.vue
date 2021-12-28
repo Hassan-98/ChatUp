@@ -34,17 +34,17 @@
     left: 5%;
     width: calc(100% - 10%);
     height: calc(90% - 50px);
-    background: #fff;
     overflow: hidden;
     text-align: center;
     border-radius: 0 0 15px 15px;
     z-index: 10;
+    background: var(--bg);
 
     @include sm {
-        top: 10%;
-        height: 90%;
-        left: 0;
-        width: 100%;
+      top: 0%;
+      height: 100%;
+      left: 0;
+      width: 100%;
     }
 
     .goBack {
