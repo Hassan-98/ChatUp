@@ -107,10 +107,10 @@
         }
         & > i{
           float: right;
-          background: #fff;
-          font-size: 28px;
-          border-radius: 50%;
+          color: var(--wit);
+          font-size: 22px;
           cursor: pointer;
+          text-shadow: none;
           &:hover{
             color: var(--mc);
           }

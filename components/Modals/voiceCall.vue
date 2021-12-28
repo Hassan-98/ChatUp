@@ -18,7 +18,7 @@
       <h3> {{ call_info.contactType == 'user' ? call_info.contact.username : call_info.contact.groupName }} </h3>
       <div v-if="call_info.statue === 'onGoingCall'" class="call-timer">
         <p>
-          {{ timer.minutes }} : {{ timer.seconds }}
+          {{ +timer.hours > 0 ? `${timer.hours} : ` : "" }} {{ timer.minutes }} : {{ timer.seconds }}
         </p>
       </div>
       <div v-if="call_info.contactType === 'group'" class="users">
@@ -237,7 +237,8 @@ export default {
     return {
       timer: {
         seconds: "00",
-        minutes: "00"
+        minutes: "00",
+        hours: 0,
       }, 
       RemoteStream: null,
       call_quality: 1,
@@ -345,6 +346,7 @@ export default {
           var {_data} = moment.duration(milli)
           this.timer.seconds = _data.seconds < 10 ? '0'+_data.seconds : _data.seconds
           this.timer.minutes = _data.minutes < 10 ? '0'+_data.minutes : _data.minutes
+          this.timer.hours = _data.hours < 10 ? '0'+_data.hours : _data.hours
         }, 1000);
       }, 1500);
 
@@ -420,9 +422,9 @@ export default {
       }
       
       clearInterval(window.callTimer);
-      this.timer.milliseconds = '00'
       this.timer.seconds = '00'
       this.timer.minutes = '00'
+      this.timer.hours = '00'
 
       if (this.call_info.contactType == 'group') {
 
@@ -547,6 +549,7 @@ export default {
           var {_data} = moment.duration(milli)
           this.timer.seconds = _data.seconds < 10 ? '0'+_data.seconds : _data.seconds
           this.timer.minutes = _data.minutes < 10 ? '0'+_data.minutes : _data.minutes
+          this.timer.hours = _data.hours < 10 ? '0'+_data.hours : _data.hours
         }, 1000);
       }, 1500);
     },
@@ -583,9 +586,9 @@ export default {
       this.$store.commit('stopCall');
 
       clearInterval(window.callTimer);
-      this.timer.milliseconds = '00'
       this.timer.seconds = '00'
       this.timer.minutes = '00'
+      this.timer.hours = '00'
     },
     async groupCallClosed ({ groupID }) {
       
@@ -620,9 +623,9 @@ export default {
       this.$store.commit('stopCall');
       
       clearInterval(window.callTimer);
-      this.timer.milliseconds = '00'
       this.timer.seconds = '00'
       this.timer.minutes = '00'
+      this.timer.hours = '00'
     },
     callCancelled ({ groupID }) {
 
@@ -664,9 +667,9 @@ export default {
       this.$store.commit('stopCall');
       
       clearInterval(window.callTimer);
-      this.timer.milliseconds = '00'
       this.timer.seconds = '00'
       this.timer.minutes = '00'
+      this.timer.hours = '00'
     },
     contactBusy () {
       if (window.callTimeout) clearTimeout(window.callTimeout);
@@ -720,6 +723,7 @@ export default {
           var {_data} = moment.duration(milli)
           this.timer.seconds = _data.seconds < 10 ? '0'+_data.seconds : _data.seconds
           this.timer.minutes = _data.minutes < 10 ? '0'+_data.minutes : _data.minutes
+          this.timer.hours = _data.hours < 10 ? '0'+_data.hours : _data.hours
         }, 1000);
       }, 1500);
     },
@@ -734,9 +738,9 @@ export default {
         this.$store.commit('stopCall');
         
         clearInterval(window.callTimer);
-        this.timer.milliseconds = '00';
         this.timer.seconds = '00';
         this.timer.minutes = '00';
+        this.timer.hours = '00'
 
         return;
       }

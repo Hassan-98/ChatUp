@@ -3,8 +3,10 @@
     <div class="chat-modal-body">
       <div class="settings">
         <section class="TOP">
-          <i v-tooltip="'close'" class="far fa-times close" @click="closeModal" />
           <div class="settings-nav">
+            <button @click="closeMenu">
+              <i v-tooltip="'Go Back'" class="fa-thin fa-arrow-left-long mr-2" style="cursor: pointer" /> Back
+            </button>
             <button class="active" @click="open($event, 'GeneralSettings')">
               <i class="fal fa-user-circle" />
               Account
@@ -63,32 +65,44 @@
         overflow-y: scroll;
         background: var(--white);
         text-align: left;
-        padding: 60px 25px 15px;
+        padding: 15px 25px 15px;
         margin: auto;
         position: relative;
         border-radius: 8px;
         @include sm {
-          padding: 70px 10px 15px;
+          padding: 15px 10px 15px;
           width: 100%;
           height: 100%;
           border-radius: 0px;
         }
         .TOP {
             position: fixed;
-            width: 90%;
+            height: 90%;
+            width: 250px;
             background-color: #fff;
-            left: 5%;
+            left: 2.5%;
             top: 5%;
             padding: 0;
-            box-shadow: 0 3px 5px rgba($color: #000, $alpha: 0.05);
-            z-index: 1;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.05);
+            z-index: -1;
             border-radius: 8px 8px 0 0;
             overflow: hidden;
+            opacity: 0;
+            transition: all 0.2s ease-in;
             @include sm {
               width: 100%;
-              left: 0;
+              height: 100%;
               top: 0;
               border-radius: 0;
+              padding: 5px 25px;
+            }
+            &.open {
+              left: 5%;
+              opacity: 1;
+              z-index: 1;
+              @include sm {
+                left: 0;
+              }
             }
             .settings-nav {
               display: flex;
@@ -96,11 +110,12 @@
               justify-content: start;
               width: 100%;
               button {
-                padding: 15px 0;
+                padding: 15px 25px;
+                text-align: left;
                 font-size: 17px;
                 border-radius: 0;
                 margin: 0;
-                flex: 0 0 20%;
+                flex: 0 0 100%;
                 color: var(--mc);
                 border: none;
                 background: #fff;
@@ -116,25 +131,31 @@
                   border-right: 0!important;
                 }
                 @include sm {
-                  flex: 0 0 50%;
-                  font-size: 14px;
-                  padding: 8px 0;
-                  &:nth-of-type(3), &:nth-of-type(4), &:nth-of-type(5) {
-                    flex: 0 0 33.333%;
-                  }
+                  border-left: 0!important;
+                  border-radius: 10px;
                   span {
                     display: none;
                   }
                 }
                 &:hover, &.active {
-                  border: 1px solid #f6f6f6;
-                  transform: none;
-                  background: var(--bg);
-                  color: var(--mc);
-                  box-shadow: inset 0 0 5px rgba($color: #000, $alpha: 0.05);
+                  &:not(:first-of-type) {
+                    border: 1px solid #f6f6f6;
+                    transform: none;
+                    background: var(--bg);
+                    color: var(--mc);
+                    box-shadow: inset 0 0 5px rgba($color: #000, $alpha: 0.05);
+                  }
+                  &:first-of-type {
+                    transform: none;
+                    i {
+                      position: relative;
+                      right: 5px;
+                    }
+                  }
                 }
                 i {
                   margin-right: 5px;
+                  transition: all 0.3s ease;
                 }
               }
             }
@@ -159,6 +180,7 @@
 </style>
 
 <script>
+/* eslint-disable */
 import GeneralSettings from './Internals/GeneralSettings.vue'
 import SecuritySettings from './Internals/SecuritySettings.vue'
 import FriendsRequests from './Internals/FriendsRequests.vue'
@@ -183,10 +205,14 @@ export default {
         child.classList.remove('active')
       })
       e.target.classList.add('active')
-      this.$store.state.openSetting = type
+      this.$store.state.openSetting = type;
+      document.querySelector(".TOP").classList.remove("open")
     },
     closeModal (e) {
       if (e.target.classList.contains('chat-modal') || (e.target.tagName === 'I' && e.target.classList.contains('close'))) { this.$store.commit('closeModal') }
+    },
+    closeMenu () {
+      document.querySelector(".TOP").classList.remove("open")
     }
   }
 }

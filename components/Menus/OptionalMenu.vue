@@ -4,7 +4,6 @@
     <div class="menu-head">
       <img :src="openUser.photo" alt="chat-img">
       <h4>{{ openUser.username }}</h4>
-      <br>
       <button v-if="!friend && cUser._id != openUser._id && !blocked" @click.stop="sendFriendRequest($event, openUser._id)">
         <i class="fad fa-user-plus" /> Add
       </button>
@@ -82,9 +81,6 @@
       font-size: 22px;
       cursor: pointer;
       text-shadow: none;
-      &:hover{
-        color: var(--bg);
-      }
     }
     .menu-head {
       padding: 40px 0 20px;
@@ -94,9 +90,12 @@
         padding: 20px 0 0;
       }
       h4 {
-        margin: 0;
+        margin: 0 0 15px;
         font-weight: bold;
         color: var(--mc);
+        @include sm {
+          margin: 0 0 5px;
+        }
       }
       span {
         font-size: 13px;

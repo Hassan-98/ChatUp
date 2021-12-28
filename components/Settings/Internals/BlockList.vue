@@ -1,6 +1,10 @@
 ﻿<template>
   <div class="open-setting">
-    <h4>Block List</h4>
+    <h4>
+      <i v-tooltip="'Go Back'" class="fa-thin fa-arrow-left-long mr-2" style="cursor: pointer" @click="closeModal" />
+      Block List
+      <i v-tooltip="'Menu'" class="fa-thin fa-bars" @click="openMenu" style="font-size: 24px;float: right;cursor: pointer;"></i>
+    </h4>
     <div v-if="currentUser.blockList.length == 0" class="no-blocks">
       <h4>No Body Blocked</h4>
     </div>
@@ -74,17 +78,26 @@
         }
         @include sm {
           width: 100%!important;
+          margin: 0px 10px 8px 0;
+          padding: 8px 0 8px 10px;
         }
         img {
           width: 50px;
           height: 50px;
           border-radius: 50%;
           margin-right: 7px;
+          @include sm {
+            width: 40px;
+            height: 40px;
+          }
         }
         h4 {
           font-weight: bold;
           color: var(--mc);
           cursor: pointer;
+          @include sm {
+            font-size: 15px;
+          }
         }
         i {
           position: absolute;
@@ -127,6 +140,12 @@ export default {
       var {user} = await this.$axios.$get(`/api/users/user?userId=${userObj._id}`)
       this.$store.commit('openOpMenu', user);
       this.$store.commit('closeModal');
+    },
+    closeModal (e) {
+      this.$store.commit('closeModal')
+    },
+    openMenu() {
+      document.querySelector(".TOP").classList.add("open")
     },
     async unBlock (e, id, username) {
       e.target.innerHTML = this.$store.state.loadingElement;

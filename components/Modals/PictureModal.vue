@@ -25,8 +25,8 @@
       width: 75%;
       height: 90%;
       @include xl {
-        width: 85%;
-        height: 90%;
+        width: 95%;
+        height: 95%;
       }
       @include lg {
         width: 90%;

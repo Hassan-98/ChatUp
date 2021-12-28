@@ -1,6 +1,10 @@
 ﻿<template>
   <div class="open-setting">
-    <h4>Security Settings</h4>
+    <h4>
+      <i v-tooltip="'Go Back'" class="fa-thin fa-arrow-left-long mr-2" style="cursor: pointer" @click="closeModal" />
+      Security Settings
+      <i v-tooltip="'Menu'" class="fa-thin fa-bars" @click="openMenu" style="font-size: 24px;float: right;cursor: pointer;"></i>
+    </h4>
     <div v-if="isGoogleUser">
       <p>
         No security settings for users who logged in via Google
@@ -144,6 +148,12 @@ export default {
     }
   },
   methods: {
+    closeModal (e) {
+      this.$store.commit('closeModal')
+    },
+    openMenu() {
+      document.querySelector(".TOP").classList.add("open")
+    },
     async edit (e) {
       e.target.innerHTML = this.$store.state.loadingElement
       const { newPass, oldPass, currentUser, $store, $axios } = this

@@ -1,7 +1,11 @@
 ﻿<template>
   <div class="open-setting">
     <ProfilePictureEditor v-if="openPictureEditor" :go-back="goBack" />
-    <h4>Account Settings</h4>
+    <h4>
+      <i v-tooltip="'Go Back'" class="fa-thin fa-arrow-left-long mr-2" style="cursor: pointer" @click="closeModal" />
+      Account Settings
+      <i v-tooltip="'Menu'" class="fa-thin fa-bars" @click="openMenu" style="font-size: 24px;float: right;cursor: pointer;"></i>
+    </h4>
     <div class="Inputs">
       <div class="input-group">
         <label>Native Language <i v-tooltip="'Native Language is used for messages translations and hearing'" class="fal fa-info-circle" style="position: relative;top:2pxleft:2px" /></label>
@@ -362,6 +366,12 @@ export default {
     },
     goBack() {
       this.openPictureEditor = false;
+    },
+    closeModal (e) {
+      this.$store.commit('closeModal')
+    },
+    openMenu() {
+      document.querySelector(".TOP").classList.add("open")
     },
     async save (e) {
       e.target.innerHTML = this.$store.state.loadingElement

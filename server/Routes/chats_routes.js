@@ -169,7 +169,7 @@ router.get('/chats/chat/:userId', authenticated, async (req, res) => {
       path: 'usersList',
       model: 'User',
       select: ['username', 'photo', 'activeNow', 'lastActive', '_id']
-    }).populate('messages.user', ['username', 'photo', '_id'])
+    }).populate('messages.user', ['username', 'photo', '_id']).populate('messages.replyTo.user', ['username', '_id']);
 
     var i = chat_room.usersList.findIndex(user => user._id == req.params.userId);
 

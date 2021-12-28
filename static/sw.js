@@ -5,7 +5,6 @@ self.addEventListener("push", e => {
         notification.title,
         {
             body: notification.body,
-            image: notification.image,
             icon: notification.image
         }
     );

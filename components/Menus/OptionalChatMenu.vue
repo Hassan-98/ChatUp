@@ -62,18 +62,6 @@
       flex: 0;
       padding: 0;
     }
-    & > i{
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      color: var(--wit);
-      font-size: 22px;
-      cursor: pointer;
-      text-shadow: none;
-      &:hover{
-        color: var(--bg);
-      }
-    }
     .menu-head {
       padding: 40px 0 0px;
       text-align: center;

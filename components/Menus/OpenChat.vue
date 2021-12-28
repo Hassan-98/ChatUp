@@ -58,9 +58,10 @@
               {{ Object.keys(chat.usersList).length }} Members
             </p>
           </div>
-          <i v-if="$store.state.mobile" v-tooltip="'Back'" class="fas fa-arrow-left" @click="closeChat" />
-          <i v-tooltip="'Start a call'" class="fas fa-phone" @click="call" />
-          <i v-if="!chat.usersList.other" v-tooltip="'Group settings'" class="fas fa-ellipsis-h" @click="openGroupSettings" />
+          <i v-if="$store.state.mobile" v-tooltip="'Back'" class="fa-thin fa-arrow-left-long" @click="closeChat" style="font-size: 22px; position: relative; top: 2px;right: 5px" />
+          <i v-tooltip="'Start a call'" class="fa-duotone fa-circle-phone-flip" @click="call" />
+          <i v-tooltip="'Settings'" v-if="chat.usersList.other" class="fa-thin fa-bars" @click="openProfile(chat.usersList.other)" style="font-size: 24px; margin-left: 10px"></i>
+          <i v-tooltip="'Settings'" v-else class="fa-thin fa-bars" @click="openGroupSettings" style="font-size: 24px; margin-left: 10px"></i>
         </div>
       </div>
       <div class="chat-body" @scroll="scrolling" @click="closeAllModals">
@@ -79,12 +80,6 @@
           <img :src="message.user.photo" alt="chat-img" @click="openProfile(message.user)">
 
           <div class="content">
-            <!-- ReplyTo -->
-            <div v-if="!message.deleted && message.replyTo && message.replyTo.user" :id="message.replyTo.messageId" class="replyTo">
-              <span class="user">{{ message.replyTo.user.username }}</span>
-              <span class="content">{{ message.replyTo.messageContent }}</span>
-            </div>
-            <!-- ReplyTo -->
 
             <!-- NORMAL MESSAGE -->
             <p
@@ -92,6 +87,14 @@
               :id="message._id"
               :class="(message.replyTo && message.replyTo.user) && 'act_to_replay'"
               @dblclick="openReplayMsg(message.msg, message._id, message.user.username, message.user._id)">
+
+              <!-- ReplyTo -->
+              <span v-if="!message.deleted && message.replyTo && message.replyTo.user" :id="message.replyTo.messageId" :class="message.msg.length >= message.replyTo.messageContent.length - 5 ? 'replyTo fullwidth' : 'replyTo'">
+                <span class="user">{{ message.replyTo.user.username }}</span>
+                <span class="content">{{ message.replyTo.messageContent }}</span>
+              </span>
+              <!-- ReplyTo -->
+
               {{ message.msg }}
             </p>
             <p v-if="message.deleted" class="deleted">
@@ -102,8 +105,8 @@
 
             <!-- VOICE CALL MESSAGE -->
             <div v-if="message.voiceCall && !message.deleted" :id="message._id" class="voiceCall-content" @dblclick="openReplayMsg('Voice Call', message._id, message.user.username, message.user._id)">
-              <i v-if="message.voiceCall.missed" class="fas fa-phone-slash missed" />
-              <i v-else class="fas fa-phone-square" />
+              <i v-if="message.voiceCall.missed" class="fa-solid fa-phone-missed missed" />
+              <i v-else class="fa-solid fa-phone-arrow-up-right"></i>
               <span v-if="message.voiceCall.missed">Missed Voice Call</span>
               <span v-else>Voice Call <i>({{ message.voiceCall.duration | formatCallDuration }})</i></span>
             </div>
@@ -453,6 +456,7 @@
               margin: 0;
               cursor: pointer;
               text-transform: capitalize;
+              margin-top: 7px;
               @include xs {
                 font-size: 17px;
               }
@@ -461,6 +465,7 @@
               margin: 0;
               font-size: 11px;
               color: var(--text);
+              margin-top: -3px;
               .greenAlert {
                 color: green;
                 font-size: 9px;
@@ -468,14 +473,11 @@
             }
           }
           & > i {
-            color: var(--white);
-            background: var(--mc);
-            padding: 8px;
+            color: var(--mc);
             margin: 5px;
+            font-size: 34px;
             border-radius: 50%;
             cursor: pointer;
-            border-color: var(--bg);
-            box-shadow: 0 0 4px rgba($color: #000, $alpha: 0.2);
             &:hover{
               background: var(--white);
               color: var(--mc);
@@ -567,11 +569,14 @@
               font-size: 16px;
               background: #F4F7FC;
               color: #212529;
-              padding: 6px 15px;
-              border-radius: 15px;
+              padding: 4px 15px;
+              border-radius: 10px;
               box-shadow: none;
-              max-width: 350px;
               box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+              max-width: 300px;
+              @include sm {
+                max-width: 240px;
+              }
               &.deleted {
                 color: #999;
                 font-style: italic;
@@ -586,6 +591,40 @@
                 position: relative;
                 z-index: 1;
                 top: -10px;
+                padding: 2px 5px 8px;
+              }
+              .replyTo {
+                background: #1e375026;
+                width: fit-content;
+                text-align: left;
+                position: relative;
+                z-index: -1;
+                top: -2px;
+                border-radius: 5px;
+                &.fullwidth {
+                  width: 100%;
+                }
+                span.user {
+                  padding: 0 5px;
+                  font-size: 13px;
+                  margin: 5px 0!important;
+                  font-weight: bold;
+                  color: #1e3750;
+                }
+                span.content {
+                  direction: rtl;
+                  unicode-bidi: plaintext;
+                  border-radius: 5px;
+                  padding: 7px 15px;
+                  border: none;
+                  width: 100%;
+                  margin: 0;
+                  font-size: 15px;
+                  background: #e9e9e952;
+                  color: #1e3750;
+                  font-family: 'Tajawal', sans-serif;
+                  max-width: 350px;
+                }
               }
               #text {
                   direction: rtl;
@@ -640,6 +679,14 @@
             p {
               background: var(--msgs);
               color: #fff;
+
+              .replyTo {
+                background: #f5f7f9ab;
+                span.content {
+                  background: #e9e9e952;
+                  text-align: right;
+                }
+              }
             }
           }
 
@@ -686,6 +733,9 @@
                 padding: 10px;
                 background: #e9ebef;
                 font-size: 20px;
+                &.missed {
+                  color: #bb0000;
+                }
               }
               span {
                 padding: 10px;
@@ -1151,37 +1201,6 @@
             }
           }
         }
-        .replyTo {
-          background: var(--bg);
-          width: fit-content;
-          padding: 5px 5px 15px;
-          text-align: left;
-          position: relative;
-          z-index: -1;
-          top: -2px;
-          border-radius: 5px;
-          span.user {
-            padding: 0 5px;
-            font-size: 13px;
-            margin: 5px 0!important;
-            font-weight: bold;
-            color: var(--mc);
-          }
-          span.content {
-            direction: rtl;
-            unicode-bidi: plaintext;
-            border-radius: 5px;
-            padding: 7px 15px;
-            border: none;
-            width: 100%;
-            margin: 0;
-            font-size: 15px;
-            background: var(--borders);
-            color: var(--mc);
-            font-family: 'Tajawal', sans-serif;
-            max-width: 350px;
-          }
-        }
       }
       .chat-reply-footer {
         background: var(--bg);
@@ -1297,10 +1316,11 @@
                 background: var(--white);
               }
               @include xs {
-                padding: 6px 8px 6px 6px;
+                padding: 5px 7px 5px 5px;
                 margin: 0;
                 position: relative;
-                top: -2px;
+                top: 0px;
+                font-size: 15px;
               }
             }
           }
@@ -1617,14 +1637,19 @@ export default {
       this.msg += emoji.data
     },
     async scrolling (e) {
-      const ele = e.target
+      const ele = e.target;
+
       if (ele.scrollTop == 0 && !this.preventMore && this.chat.messages[0].msg !== 'Welcome To The New Chat Room') {
-        this.showen+=30
-        this.preventMore = true
+
+      console.log(this.$store.state.openedChat.messages)
+
+        this.showen += 30;
+
+        this.preventMore = true;
+
         const {chat_room} = await this.$axios.$get(`/api/chats/chat/${this.currentUser._id}?roomId=${this.chat._id}&limit=${this.showen}`)
-        if(!chat_room){
-          return;
-        }
+        if(!chat_room) return;
+        
         const usersList = {}
         chat_room.usersList.forEach((user) => {
           if (user._id === this.currentUser._id) {
@@ -1632,10 +1657,13 @@ export default {
           } else {
             usersList.other = user
           }
-        })
+        });
+
         chat_room.usersList = usersList
         this.$store.state.openedChat = chat_room
-        this.preventMore = false
+
+      console.log(this.$store.state.openedChat.messages)
+        this.preventMore = false;
       }
     },
     async openProfile (userObj) {

@@ -3,22 +3,25 @@
     <!-- Head Menu -->
     <div class="row menu-head">
       <div class="col-12 p-0 m-0">
-        <h3>{{ $store.state.opendMenu }}</h3>
+        <h4>
+          <img v-tooltip="currentUser.username" @click="openProfile" :src="currentUser.photo" class="img-fluid" alt="current user">
+          {{ $store.state.opendMenu }}
+        </h4>
       </div>
       <div class="icons-bar">
         <div class="head-icon">
-          <i v-tooltip="'Friend Requests'" class="fad fa-bell notification" :class="currentUser.requestsList.length > 0 && `newRequests`" @click="showFriendRequests">
+          <i v-tooltip="'Friend Requests'" class="fa-duotone fa-bell notification" :class="currentUser.requestsList.length > 0 && `newRequests`" @click="showFriendRequests">
             <span v-if="currentUser.requestsList.length > 0" class="new" />
           </i>
         </div>
         <div class="head-icon">
-          <i v-tooltip="'Create new group'" class="fad fa-users" @click="createNewGroup" />
+          <i v-tooltip="'Create new group'" class="fa-duotone fa-users-medical" @click="createNewGroup" />
         </div>
         <div class="head-icon">
-          <i v-tooltip="'Find contact'" class="fad fa-search-plus" @click="addNewFriend" />
+          <i v-tooltip="'Find contact'" class="fa-duotone fa-magnifying-glass-plus" @click="addNewFriend" />
         </div>
         <div class="head-icon">
-          <i v-tooltip="'Add to diaries'" class="fad fa-calendar-plus" @click="addNewDiary" />
+          <i v-tooltip="'Add to diaries'" class="fa-duotone fa-icons" @click="addNewDiary" />
         </div>
       </div>
     </div>
@@ -98,12 +101,22 @@
       align-items: center;
       justify-content: space-between;
       padding: 5px 0;
-      h3 {
+      h4 {
         font-weight: bold;
         color: var(--mc);
         text-align: left;
         @include sm {
-          margin: 0 0 10px;
+          margin: 0 0 7px;
+        }
+        img {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          margin-right: 5px;
+          position: relative;
+          top: -2px;
+          border: 2px solid #ccc;
+          cursor: pointer;
         }
       }
       .icons-bar {
@@ -242,7 +255,7 @@
           text-align: center;
           p {
             color: var(--mc);
-            margin: 10px 5px 0 0;
+            margin: 28px 5px 0 0;
             font-size: 10px;
           }
         }
@@ -388,6 +401,11 @@ export default {
 
   },
   methods: {
+    async openProfile () {
+      var {user} = await this.$axios.$get(`/api/users/user?userId=${this.currentUser._id}`)
+      this.$store.commit('openOpMenu', user);
+      this.$store.commit('closeModal');
+    },
     convertChatsUsers(chats){
       const currentUser = this.$store.state.user;
 
