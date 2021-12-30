@@ -145,12 +145,21 @@ async function start () {
     });
 
     /************** Sending A Message To A Chat **************/
-    socket.on('msg', async (msg) => {
+    socket.on('msg', async (msg, endCallMessage) => {
       const tempId = Math.floor(Math.random() * 1000000000000000);
 
       const { allowed, ERROR } = await checkPermissions(msg.userId, msg.chatId);
 
       if (allowed && !ERROR) {
+
+        if (endCallMessage) {
+          const {message, usersList} = await saveMessage(msg, tempId);
+
+          return usersList.forEach(user => {
+            io.to(user + 'PERSONAL CHANNEL').emit('recieveFriendMsg', {message, chatId: msg.chatId});
+          });
+        }
+
         socket.emit('recieveMyMsg', { ...msg, sentAt: Date.now(), sent: false, _id: tempId, user: { _id: msg.userId } });
 
         const {err, message, usersList} = await saveMessage(msg, tempId);

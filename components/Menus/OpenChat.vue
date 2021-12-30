@@ -1674,8 +1674,6 @@ export default {
 
       if (ele.scrollTop == 0 && !this.preventMore && this.chat.messages[0].msg !== 'Welcome To The New Chat Room') {
 
-      console.log(this.$store.state.openedChat.messages)
-
         this.showen += 30;
 
         this.preventMore = true;
@@ -1694,8 +1692,6 @@ export default {
 
         chat_room.usersList = usersList
         this.$store.state.openedChat = chat_room
-
-      console.log(this.$store.state.openedChat.messages)
         this.preventMore = false;
       }
     },
@@ -2095,7 +2091,7 @@ export default {
 
       // Check Blocked User
       var idx = -1;
-      if (this.chat.usersList.other) idx = this.currentUser.blockList.findIndex(user => user._id == chat.usersList.other._id);
+      if (this.chat.usersList.other) idx = this.currentUser.blockList.findIndex(user => user._id == this.chat.usersList.other._id);
       if (idx > -1) return this.Toast.fire({ icon: 'error', title: 'You blocked this contact, go to settings to unblock' });
 
       // Block Call if user is not active
@@ -2131,6 +2127,23 @@ export default {
         this.Toast.fire({ icon: 'error', title: 'No Response' })
 
         $socket.emit('cancelCall', { otherUserID: receiverID });
+
+        const message = {
+          msg: '',
+          voiceCall: {
+            missed: true,
+            duration: 0
+          },
+          chatId: this.chat._id,
+          userId: this.currentUser._id,
+          userToId: false,
+          notSeen: []
+        }
+
+        message.userToId = this.chat.usersList.other._id;
+        message.notSeen.push(this.chat.usersList.other._id);
+
+        $socket.emit('msg', message);
 
         $store.commit('stopCall');
 
@@ -2200,6 +2213,23 @@ export default {
           this.Toast.fire({ icon: 'error', title: 'No Response' })
 
           $socket.emit('cancelGroupCall', { groupID: receiverID });
+
+          const message = {
+            msg: '',
+            voiceCall: {
+              missed: true,
+              duration: 0
+            },
+            chatId: this.chat._id,
+            userId: this.currentUser._id,
+            userToId: false,
+            notSeen: []
+          }
+          
+          Object.values(this.chat.usersList).forEach(contact => contact._id !=  this.currentUser._id && message.notSeen.push(contact._id));
+          
+
+          $socket.emit('msg', message);
 
           $store.commit('stopCall');
 

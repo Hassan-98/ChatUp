@@ -290,17 +290,18 @@ export default {
 
       } else {
         chat = this.$store.state.chats.find(chat => {
+          const myID = this.currentUser._id;
           if (chat.usersList.length) {
             const usersList = {}
 
             chat.usersList.forEach((user) => {
-              if (user._id === this.currentUser._id) usersList.me = user;
+              if (user._id === myID) usersList.me = user;
               else usersList.other = user;
             })
 
             chat.usersList = usersList
           }
-          return chat.usersList.other._id == chatID && chat.roomType == "Chats";
+          return (chat.usersList.other._id == chatID && chat.usersList.me._id == myID) && chat.roomType == "Chats";
         });
 
         if (chat.usersList.length) {
@@ -357,8 +358,13 @@ export default {
 
       if (window.callTimeout) clearTimeout(window.callTimeout);
 
-      if (this.call_info.caller) {
+      if (this.call_info.contactType == 'group') {
+
+        if (!this.call_info.caller) return this.$store.commit('stopCall');
+        
+        // Send Missed Call Message
         var chat = this.findAndConvertChatMembers(this.call_info.contact._id);
+        const callerID = this.call_info.callerUserID;
 
         const message = {
           msg: '',
@@ -367,25 +373,40 @@ export default {
             duration: 0
           },
           chatId: chat._id,
-          userId: this.currentUser._id,
+          userId: callerID,
           userToId: false,
           notSeen: []
         }
-        
 
-        if (chat.usersList.other) {
-          message.userToId = chat.usersList.other._id;
-          message.notSeen.push(chat.usersList.other._id);
-        } else {
-          Object.values(chat.usersList).forEach(contact => contact._id !=  this.currentUser._id && message.notSeen.push(contact._id));
+        Object.values(chat.usersList).forEach(contact => contact._id !=  this.currentUser._id && message.notSeen.push(contact._id));
+
+        if (callerID != this.currentUser._id) this.$socket.emit('msg', message, true);
+        else this.$socket.emit('msg', message);
+
+        return this.$socket.emit('cancelGroupCall', { groupID: this.call_info.contact._id });
+
+      } else {
+        // Send Missed Call Message
+        var chat = this.findAndConvertChatMembers(this.call_info.contact._id);
+        const callerID = this.call_info.contact._id;
+
+        const message = {
+          msg: '',
+          voiceCall: {
+            missed: true,
+            duration: 0
+          },
+          chatId: chat._id,
+          userId: callerID,
+          userToId: false,
+          notSeen: []
         }
 
-        this.$socket.emit('msg', message);
-      }
+        message.userToId = chat.usersList.other._id;
+        message.notSeen.push(chat.usersList.other._id);
 
-      if (this.call_info.contactType == 'group') {
-        if (!this.call_info.caller) return this.$store.commit('stopCall');
-        return this.$socket.emit('cancelGroupCall', { groupID: this.call_info.contact._id });
+        if (callerID != this.currentUser._id) this.$socket.emit('msg', message, true);
+        else this.$socket.emit('msg', message);
       }
 
       this.$socket.emit('cancelCall', { otherUserID: this.call_info.contact._id });
@@ -393,34 +414,11 @@ export default {
     },
     async closeCall () {
       const call_info = { otherUserID: this.call_info.contact._id };
-      
-      if (this.call_info.caller) {
-        const chat = this.findAndConvertChatMembers(this.call_info.contact._id);
-        const stats = window.client.getRTCStats();
+      const callerID = this.call_info.caller ? 
+                          this.currentUser._id 
+                          : 
+                          this.call_info.contactType == 'group' ? this.call_info.callerUserID : this.call_info.contact._id;
 
-        const message = {
-          msg: '',
-          voiceCall: {
-            missed: false,
-            duration: stats.Duration
-          },
-          chatId: chat._id,
-          userId: this.currentUser._id,
-          userToId: false,
-          notSeen: []
-        }
-        
-
-        if (chat.usersList.other) {
-          message.userToId = chat.usersList.other._id;
-          message.notSeen.push(chat.usersList.other._id);
-        } else {
-          Object.values(chat.usersList).forEach(contact => contact._id !=  this.currentUser._id && message.notSeen.push(contact._id));
-        }
-
-        this.$socket.emit('msg', message);
-      }
-      
       clearInterval(window.callTimer);
       this.timer.seconds = '00'
       this.timer.minutes = '00'
@@ -433,20 +431,66 @@ export default {
           var lastUser = this.call_info.joinedUsers.find(user => user._id !== this.$store.state.user._id);
 
           if (lastUser) {
-            var lastUserID = lastUser._id;
+            // Send Call Info Message
+            const chat = this.findAndConvertChatMembers(this.call_info.contact._id);
+            const stats = window.client.getRTCStats();
 
+            const message = {
+              msg: '',
+              voiceCall: {
+                missed: false,
+                duration: stats.Duration
+              },
+              chatId: chat._id,
+              userId: callerID,
+              userToId: false,
+              notSeen: []
+            }
+
+            Object.values(chat.usersList).forEach(contact => contact._id !=  this.currentUser._id && message.notSeen.push(contact._id));
+            
+            if (callerID != this.currentUser._id) this.$socket.emit('msg', message, true);
+            else this.$socket.emit('msg', message);
+            
+            var lastUserID = lastUser._id;
+            // Close The Call
             this.$socket.emit("closeGroupCall", { groupID: this.call_info.contact._id, lastUserID });
           }
 
-        } 
+        } else {
+          // Close The Call
+          this.$store.commit('stopCall');
+
+          this.$socket.emit("removeAUserFromGroupCall", { groupID: this.call_info.contact._id, removedUserID: this.$store.state.user._id })
+        };
+
+      } else {
+        // Close The Call
+        this.$store.commit('stopCall');
         
-        else this.$socket.emit("removeAUserFromGroupCall", { groupID: this.call_info.contact._id, removedUserID: this.$store.state.user._id });
+        // Send Call Info Message
+        const chat = this.findAndConvertChatMembers(this.call_info.contact._id);
+        const stats = window.client.getRTCStats();
 
+        const message = {
+          msg: '',
+          voiceCall: {
+            missed: false,
+            duration: stats.Duration
+          },
+          chatId: chat._id,
+          userId: callerID,
+          userToId: false,
+          notSeen: []
+        }
+        
+        message.userToId = chat.usersList.other._id;
+        message.notSeen.push(chat.usersList.other._id);
+
+        if (callerID != this.currentUser._id) this.$socket.emit('msg', message, true);
+        else this.$socket.emit('msg', message);
+        this.$socket.emit("closeCall", call_info);
       }
-  
-      else this.$socket.emit("closeCall", call_info);
-
-      this.$store.commit('stopCall');
 
     },
     muteOrUnmuteVoice (e) {
@@ -556,33 +600,6 @@ export default {
     async callClosed () {
       this.Toast.fire({ icon: 'error', title: 'Call Ended' });
 
-      if (this.call_info.caller) {
-        const chat = this.findAndConvertChatMembers(this.call_info.contact._id);
-        const stats = window.client.getRTCStats();
-
-        const message = {
-          msg: '',
-          voiceCall: {
-            missed: false,
-            duration: stats.Duration
-          },
-          chatId: chat._id,
-          userId: this.currentUser._id,
-          userToId: false,
-          notSeen: []
-        }
-        
-
-        if (chat.usersList.other) {
-          message.userToId = chat.usersList.other._id;
-          message.notSeen.push(chat.usersList.other._id);
-        } else {
-          Object.values(chat.usersList).forEach(contact => contact._id !=  this.currentUser._id && message.notSeen.push(contact._id));
-        }
-
-        this.$socket.emit('msg', message);
-      }
-
       this.$store.commit('stopCall');
 
       clearInterval(window.callTimer);
@@ -591,41 +608,16 @@ export default {
       this.timer.hours = '00'
     },
     async groupCallClosed ({ groupID }) {
-      
       if (groupID != this.call_info.contact._id) return;
       
       this.Toast.fire({ icon: 'error', title: 'Call Ended' });
-
-      const chat = this.findAndConvertChatMembers(this.call_info.contact._id);
-      const stats = window.client.getRTCStats();
-
-      const message = {
-        msg: '',
-        voiceCall: {
-          missed: false,
-          duration: stats.Duration
-        },
-        chatId: chat._id,
-        userId: this.call_info.callerUserID,
-        userToId: false,
-        notSeen: []
-      }
-
-      if (chat.usersList.other) {
-        message.userToId = chat.usersList.other._id;
-        message.notSeen.push(chat.usersList.other._id);
-      } else {
-        Object.values(chat.usersList).forEach(contact => contact._id != this.currentUser._id && message.notSeen.push(contact._id));
-      }
-
-      this.$socket.emit('msg', message);
-
-      this.$store.commit('stopCall');
       
       clearInterval(window.callTimer);
       this.timer.seconds = '00'
       this.timer.minutes = '00'
       this.timer.hours = '00'
+
+      this.$store.commit('stopCall');
     },
     callCancelled ({ groupID }) {
 
@@ -635,32 +627,6 @@ export default {
 
       const Ringtone = document.querySelector(".ringtone_element")
       Ringtone.pause();
-
-      if (this.call_info.caller) {
-        var chat = this.findAndConvertChatMembers(this.call_info.contact._id);
-
-        const message = {
-          msg: '',
-          voiceCall: {
-            missed: true,
-            duration: 0
-          },
-          chatId: chat._id,
-          userId: this.currentUser._id,
-          userToId: false,
-          notSeen: []
-        }
-        
-
-        if (chat.usersList.other) {
-          message.userToId = chat.usersList.other._id;
-          message.notSeen.push(chat.usersList.other._id);
-        } else {
-          Object.values(chat.usersList).forEach(contact => contact._id !=  this.currentUser._id && message.notSeen.push(contact._id));
-        }
-
-        this.$socket.emit('msg', message);
-      }
 
       this.Toast.fire({ icon: 'error', title: 'Call Cancelled' });
 

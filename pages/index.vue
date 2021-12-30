@@ -321,7 +321,7 @@ export default {
       if (contactType == "user" && this.$store.state.call_info.statue === "onGoingCall") return this.$socket.emit("contactBusy", {callerUserID});
       
       var idx = this.currentUser.blockList.findIndex(user => user._id == callerUserID);
-      if (idx > -1) return this.$socket.emit("cantCallBlockedContact", {callerUserID});
+      if (contactType == "user" && idx > -1) return this.$socket.emit("cantCallBlockedContact", {callerUserID});
 
       if (contactType == "group" && this.$store.state.call_info.statue === "onGoingCall") return;
 
