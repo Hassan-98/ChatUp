@@ -340,7 +340,7 @@ img {
   width: auto;
   height: auto;
   max-height: 95%;
-  aspect-ratio: 16/9;
+  max-width: 95%;
   top: 50%;
   transform: translate(-50%, -50%);
 }
