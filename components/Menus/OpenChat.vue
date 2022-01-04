@@ -225,7 +225,7 @@
 
 <style lang="scss">
   .OpenedChat {
-    height: 100vh;
+    height: 100%;
     text-align: center;
     position: relative;
     background: #fff;
@@ -1244,6 +1244,7 @@
         z-index: 2;
         padding: 0 15px 10px;
         text-align: left;
+        height: auto;
         &.show {
           bottom: 70px;
           @include xs {

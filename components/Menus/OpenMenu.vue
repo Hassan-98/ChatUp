@@ -74,7 +74,7 @@
 
 <style lang="scss">
   .OpendMenu {
-    height: 100vh;
+    height: 100%;
     background: var(--bg);
     padding: 5px 10px;
     box-shadow: 1px 0 1px rgba($color: #000000, $alpha: 0.1);
@@ -101,6 +101,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 5px 0;
+      height: auto!important;
       h4 {
         font-weight: bold;
         color: var(--mc);
@@ -182,7 +183,7 @@
       }
     }
     .allChats {
-      height: calc(100vh - 165px);
+      height: calc(100% - 165px);
       overflow-y: scroll;
       &.adaptWithStories {
         height: calc(100vh - 265px);
@@ -211,6 +212,7 @@
         cursor: pointer;
         position: relative;
         border-radius: 10px;
+        height: auto;
         &:hover {
           background: var(--white);
 

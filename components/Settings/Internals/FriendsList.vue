@@ -1,9 +1,9 @@
 ﻿<template>
   <div class="open-setting">
     <h4>
-      <i v-tooltip="'Go Back'" class="fa-thin fa-arrow-left-long mr-2" style="cursor: pointer" @click="closeModal" />
+      <i v-tooltip="'Menu'" class="fa-thin fa-bars mr-2" style="cursor: pointer;" @click="openMenu" />
       Friends List
-      <i v-tooltip="'Menu'" class="fa-thin fa-bars" @click="openMenu" style="font-size: 24px;float: right;cursor: pointer;"></i>
+      <i v-tooltip="'Close'" class="fa-thin fa-times" style="font-size: 24px;float: right;cursor: pointer;" @click="closeModal" />
     </h4>
     <input v-model="searchTxt" type="text" placeholder="Search Friends" @keyup="search">
     <div v-if="friendsList.length == 0" class="no-friends">

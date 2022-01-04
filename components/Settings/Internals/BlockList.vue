@@ -1,9 +1,9 @@
 ﻿<template>
   <div class="open-setting">
     <h4>
-      <i v-tooltip="'Go Back'" class="fa-thin fa-arrow-left-long mr-2" style="cursor: pointer" @click="closeModal" />
+      <i v-tooltip="'Menu'" class="fa-thin fa-bars mr-2" style="cursor: pointer;" @click="openMenu" />
       Block List
-      <i v-tooltip="'Menu'" class="fa-thin fa-bars" @click="openMenu" style="font-size: 24px;float: right;cursor: pointer;"></i>
+      <i v-tooltip="'Close'" class="fa-thin fa-times" style="font-size: 24px;float: right;cursor: pointer;" @click="closeModal" />
     </h4>
     <div v-if="currentUser.blockList.length == 0" class="no-blocks">
       <h4>No Body Blocked</h4>

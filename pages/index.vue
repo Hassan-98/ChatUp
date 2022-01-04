@@ -24,6 +24,8 @@
   position: relative;
   .row {
     margin: 0;
+    height: 100%;
+    max-height: 100vh;
   }
 }
 </style>
