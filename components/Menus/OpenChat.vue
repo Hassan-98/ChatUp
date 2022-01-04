@@ -532,11 +532,12 @@
             & > i {
               display: inline;
               font-size: 13px;
-              color: #878686;
+              color: #777;
               cursor: pointer;
               position: absolute;
               top: 35%;
-              transform: translate(5px, -50%);
+              padding: 7px;
+              transform: translate(0, -50%);
               z-index: 999999999999;
               .options-menu {
                 border-radius: 8px;
@@ -547,14 +548,14 @@
                 z-index: 99999999999999;
                 top: -80px;
                 padding: 0;
-                left: calc(100% + 5px);
+                left: 100%;
                 width: 130px;
                 list-style: none;
                 background: var(--white);
                 box-shadow: 0 0 3px rgba($color: #000000, $alpha: 0.15);
                 @include xs {
                   left: unset;
-                  right: calc(100% + 5px);
+                  right: 95%;
                 }
                 &.show {
                   display: inline-block;
@@ -697,14 +698,14 @@
             text-align: right;
             .content {
               & > i {
-              transform: translate(-5px, -50%);
+              transform: translate(3px, -50%);
                 .options-menu {
-                  right: calc(100% + 5px);
+                  right: 100%;
                   top: -120px;
                   @include xs {
                     right: unset;
                     top: -60px;
-                    left: calc(100% + 5px);
+                    left: 14px;
                   }
                 }
               }
