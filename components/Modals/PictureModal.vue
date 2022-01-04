@@ -40,8 +40,8 @@
         height: 70%;
       }
       @include xs {
-        width: 98%;
-        height: 50%;
+        width: 97%;
+        height: 97%;
       }
       padding: 2px;
       overflow: hidden;
