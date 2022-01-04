@@ -20,7 +20,7 @@
 
 .main {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   position: relative;
   .row {
     margin: 0;

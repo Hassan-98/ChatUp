@@ -12,7 +12,7 @@ html {
     line-height: 1.15;
     -webkit-text-size-adjust: 100%;
     overflow: hidden;
-    min-height: 100vh;
+    height: 100%;
     background: var(--mc);
 }
 body {
@@ -25,6 +25,17 @@ body {
   transition: 0s;
   &[x-placement="bottom"] {
     top: 5px!important;
+  }
+}
+#__nuxt {
+  height: 100%;
+
+  #__layout {
+    height: 100%;
+
+    & > div {
+      height: 100%;
+    }
   }
 }
 </style>
