@@ -71,7 +71,7 @@ export default {
       }
     }
 
-    //check if the serveice worker can work in the current browser
+    // check if the serveice worker can work in the current browser
     if('serviceWorker' in navigator){
       await window.Notification.requestPermission()
       this.subscribe().catch(err => console.error(err));

@@ -388,7 +388,7 @@ export default {
       } else {
         // Send Missed Call Message
         var chat = this.findAndConvertChatMembers(this.call_info.contact._id);
-        const callerID = this.call_info.contact._id;
+      const callerID = this.call_info.caller ? this.currentUser._id : this.call_info.contact._id;
 
         const message = {
           msg: '',

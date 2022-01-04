@@ -83,6 +83,7 @@ const sendMessageNotifications = (users, senderId, chat) => {
   const sender = users.find(user => user._id == senderId);
   users.forEach(user => {
     if (user._id !== sender._id && !user.activeNow && user.notifications_subscriptions && user.notifications_subscriptions.length) {
+      console.log("Run");
       user.notifications_subscriptions.forEach(subscription => {
         // Notification Payload
         const payload = JSON.stringify({
@@ -136,7 +137,7 @@ const saveMessage = async (msg, tempId) => {
     const savedChat = await CHAT.findById(msg.chatId).populate({
         path: 'usersList',
         model: 'User',
-        select: ['username', 'notifications_subscriptions', '_id']
+        select: ['username', 'notifications_subscriptions', '_id', 'activeNow']
       })
       .populate('messages.user', ['username', 'photo', '_id'])
       .populate('messages.replyTo.user', ['username', '_id']);
