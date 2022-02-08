@@ -61,6 +61,13 @@ app.use(cookieParser());
 const config = require('../nuxt.config.js')
 config.dev = process.env.NODE_ENV !== 'production'
 
+// wakeup api
+app.get('/api/wakeup', async (req, res) => {
+  res.json({
+    success: 'API Wakeup - Success'
+  })
+});
+
 // Routes Guard Middleware
 const routesGuard = require('./Middlewares/routes_guard');
 app.use(routesGuard);
