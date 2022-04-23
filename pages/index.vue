@@ -76,7 +76,7 @@ export default {
     // check if the serveice worker can work in the current browser
     if('serviceWorker' in navigator){
       await window.Notification.requestPermission()
-      this.subscribe().catch(err => console.error(err));
+      // this.subscribe().catch(err => console.error(err));
     }
 
     this.$socket.emit('connectUser', this.currentUser);
@@ -141,7 +141,7 @@ export default {
     },
     async subscribe() {
       //register service worker
-      const register = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      const register = await navigator.serviceWorker.register('/serviceWorker.js', { scope: '/' });
 
       var serviceWorker;
       if (register.installing) {

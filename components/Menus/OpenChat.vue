@@ -1420,7 +1420,7 @@
 
 <script>
 /* eslint-disable */
-import VEmojiPicker from "v-emoji-picker";
+import { VEmojiPicker } from "v-emoji-picker";
 import UploadingLoader from "../Modals/uploading.vue";
 
 const Recorder = () => {

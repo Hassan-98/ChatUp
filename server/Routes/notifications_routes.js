@@ -9,7 +9,7 @@ router.post('/subscribeToNotifications', authenticated, async (req, res) => {
     try {
         const { userId, subscription } = req.body;
 
-        const user = await USER.findById(userId);
+        const user = await USER.findById(userId, { notifications_subscriptions: 1 });
 
         if (user.notifications_subscriptions) {
             if (user.notifications_subscriptions.indexOf(subscription) === -1) user.notifications_subscriptions.push(subscription);
@@ -19,9 +19,9 @@ router.post('/subscribeToNotifications', authenticated, async (req, res) => {
 
         await user.save();
 
-        res.sendStatus(200)
+        res.sendStatus(200);
     } catch (e) {
-        res.send({ err: e.message })
+        res.json({ err: e.message })
     }
   }
 );

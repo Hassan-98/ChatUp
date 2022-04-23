@@ -48,7 +48,8 @@ module.exports = {
     'bootstrap-vue/nuxt',
     '@nuxtjs/axios',
     '@nuxtjs/dotenv',
-    '@nuxtjs/style-resources'
+    '@nuxtjs/style-resources',
+    '@nuxtjs/pwa'
   ],
   env: {
     BASE_URL: process.env.BASE_URL,
@@ -65,5 +66,16 @@ module.exports = {
   },
   build: {
     extend (config, ctx) {}
+  },
+  pwa: {
+    meta: {
+      title: 'ChatUp App',
+      author: 'Hassan Ali'
+    },
+    manifest: {
+      name: 'ChatUp App - Free Chat App',
+      short_name: 'ChatUp App',
+      lang: 'en'
+    }
   }
 }

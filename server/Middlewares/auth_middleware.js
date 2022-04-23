@@ -8,6 +8,7 @@ const auth_middleware = {
       const user = jwt.verify(req.cookies.currentUser, process.env.JWT_SECRET);
 
       if (user) next();
+
       else res.redirect('/login');
     }
 
@@ -20,6 +21,7 @@ const auth_middleware = {
       const user = jwt.verify(req.cookies.currentUser, process.env.JWT_SECRET);
       
       if (!user) next();
+      
       else res.redirect('/');
     }
 

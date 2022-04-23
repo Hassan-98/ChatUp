@@ -79,16 +79,35 @@ const sendStoryNotification = async (friendsIDs, senderId) => {
 }
 
 // Send A Message Notifications
-const sendMessageNotifications = (users, senderId, chat) => {
+const sendMessageNotifications = (users, senderId, chat, messageType) => {
   const sender = users.find(user => user._id == senderId);
   users.forEach(user => {
     if (user._id !== sender._id && !user.activeNow && user.notifications_subscriptions && user.notifications_subscriptions.length) {
-      console.log("Run");
       user.notifications_subscriptions.forEach(subscription => {
+        let message = "";
+        
+        switch (messageType) {
+          case "loaction":
+            message = "Location Sent"
+            break;
+          case "voiceCall":
+            message = "Missed Voice Call"
+            break;
+          case "file":
+            message = "File Sent"
+            break;
+          case "record":
+            message = "Record Sent"
+            break;
+          default:
+            message = chat.messages.at(-1).msg.length > 20 ? chat.messages.at(-1).msg.slice(0, 20) + "..." : chat.messages.at(-1).msg;
+            break;
+        }
+
         // Notification Payload
         const payload = JSON.stringify({
           title: `New message from ${chat.roomType == "Chats" ? sender.username : chat.groupName}`,
-          body: "There are new messages to checkout",
+          body: message,
           image: "/imgs/chatLogoDark.png" 
         });
         
@@ -102,26 +121,29 @@ const sendMessageNotifications = (users, senderId, chat) => {
 // Save A Message To DB
 const saveMessage = async (msg, tempId) => {
   try {
-    const chat_room = await CHAT.findById(msg.chatId);
-    
-    if (!chat_room.usersList.includes(msg.userId)) throw new Error("You are not allowed to send messages to this chat");
-
-    if (msg.userToId){
-      const userTo = await USER.findById(msg.userToId);
-
-      var idx = userTo.blockList.findIndex(user => user._id == msg.userId);
-      if (idx > -1) throw new Error(`You can't send messages to ${userTo.username}`);
-    }
-
     var message = { user: msg.userId, msg: '', sentAt: Date.now(), sent: true, notSeen: msg.notSeen, tempId };
 
-    if (msg.location) message.location = msg.location;
+    let messageType = "message";
 
-    else if (msg.voiceCall) message.voiceCall = msg.voiceCall;
+    if (msg.location) {
+      message.location = msg.location;
+      messageType = "location";
+    }
 
-    else if (msg.file) message.file = msg.file;
+    else if (msg.voiceCall) {
+      message.voiceCall = msg.voiceCall;
+      messageType = "voiceCall";
+    }
 
-    else if (msg.record) message.record = msg.record
+    else if (msg.file) {
+      message.file = msg.file;
+      messageType = "file";
+    }
+
+    else if (msg.record) {
+      message.record = msg.record;
+      messageType = "record";
+    }
 
     else message.msg = msg.msg
 
@@ -130,24 +152,36 @@ const saveMessage = async (msg, tempId) => {
       user: mongoose.Types.ObjectId(msg.replyTo.userId)
     };
 
-    chat_room.messages.push(message)
+    const savedChat = await CHAT.findByIdAndUpdate(msg.chatId, 
+      { $push: { messages: message } },
+      {
+        new: true,
+        populate: [
+          { 
+            path: "usersList",
+            select: ["username", "notifications_subscriptions", "activeNow"]
+          },
+          { 
+            path: "messages.user",
+            select: ["username", "photo"]
+          },
+          { 
+            path: "messages.replyTo.user",
+            select: ["username"]
+          }
+        ]
+      }
+    )
+    .populate()
+    .select({ usersList: 1, messages: 1, roomType: 1, groupName: 1 })
+    .lean();
 
-    await chat_room.save();
-
-    const savedChat = await CHAT.findById(msg.chatId).populate({
-        path: 'usersList',
-        model: 'User',
-        select: ['username', 'notifications_subscriptions', '_id', 'activeNow']
-      })
-      .populate('messages.user', ['username', 'photo', '_id'])
-      .populate('messages.replyTo.user', ['username', '_id']);
-
-    const Message = savedChat.messages.find(message => message.tempId == tempId);
+    const Message = savedChat.messages.at(-1);
 
     // Send A Notification to Chat Users
-    sendMessageNotifications(savedChat.usersList, msg.userId, savedChat);
+    sendMessageNotifications(savedChat.usersList, msg.userId, savedChat, messageType);
 
-    return {message: Message, usersList: chat_room.usersList}
+    return { message: Message, usersList: savedChat.usersList }
   } catch (e) {
     return {err: e.message}
   }
@@ -157,9 +191,13 @@ const saveMessage = async (msg, tempId) => {
 // Set Message As Deleted At DB
 const deleteMessage = async ({msgId, chatId, userId}) => {
   try {
-    const chat_room = await CHAT.findById(chatId);
+    const chat_room = await CHAT.findById(chatId).select({ messages: 1 });
 
-    const message = chat_room.messages.find(message => message._id == msgId);
+    const messageIdx = chat_room.messages.findIndex(message => message._id == msgId);
+
+    if (messageIdx === -1) throw new Error(`Message is not found`);
+
+    const message = chat_room.messages[messageIdx];
 
     if (!message || message.user != userId) throw new Error(`You are not allowed to delete this message`);
 
@@ -171,30 +209,23 @@ const deleteMessage = async ({msgId, chatId, userId}) => {
         deleteFile(oldFileName);
       } catch {}
     }
-
-    const messageIdx = chat_room.messages.findIndex(message => message._id == msgId);
     
     chat_room.messages.splice(messageIdx, 1, message);
 
     await chat_room.save();
 
-    return {message}
+    return { message }
   } catch (e) {
-    return {err: e.message}
+    return { err: e.message }
   }
 }
 
-// Get The Chat In Between Two Contacts
-const getChatInBetween = async (userId, userToId) => {
-  var chatInBetween = await CHAT.findOne({ usersList: { $all : [userId, userToId] }, roomType: 'Chats' })
+// Delete The Chat In Between Two Contacts
+const deleteChatInBetween = async (userId, userToId) => {
+  var chatInBetween = await CHAT.findOneAndRemove({ usersList: { $all : [userId, userToId] }, roomType: 'Chats' })
 
-  if (chatInBetween) {
-
-    await CHAT.findByIdAndDelete(chatInBetween._id);
-
-    return chatInBetween;
-
-  } else return false
+  if (chatInBetween) return chatInBetween;
+  else return false
 }
 
 
@@ -265,20 +296,30 @@ const editGroup = async ({groupId, edits}) => {
 }
 
 // Check Sending Messages Permissions
-const checkPermissions = async (userId, chatId) => {
+const checkPermissions = async (userId, chatId, userToId) => {
   try {
-    const chat_room = await CHAT.findById(chatId)
-    if (!chat_room || !chat_room.usersList.includes(userId)) throw new Error("You are not allowed to send messages to this chat")
-    return {allowed: true}
+    const chat_room = await CHAT.findById(chatId).select({ usersList: 1 }).lean();
+    
+    if (!chat_room || !chat_room.usersList.map(id => String(id)).includes(userId)) throw new Error("You are not allowed to send messages to this chat");
+    
+    if (userToId){
+      const userTo = await USER.findById(userToId).select({ username: 1, blockList: 1 }).lean();
+
+      var idx = userTo.blockList.findIndex(user => String(user._id) == userId);
+      
+      if (idx > -1) throw new Error(`You can't send messages to ${userTo.username}`);
+    }
+
+    return { allowed: true }
   } catch (e) {
-    return {ERROR: e.message}
+    return { ERROR: e.message }
   }
 }
 
 /* EXPORT FUNCTIONS */
 module.exports = {
   setLastActive,
-  getChatInBetween,
+  deleteChatInBetween,
   saveMessage,
   deleteMessage,
   getAllChatsId,

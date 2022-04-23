@@ -11,8 +11,8 @@ router.get('/users/user', async (req, res) => {
     var id = req.query.userId
     var email = req.query.email
 
-    if (id) user = await UserModel.findOne({_id: id})
-    else if (email) user = await UserModel.findOne({email})
+    if (id) user = await UserModel.findOne({ _id: id })
+    else if (email) user = await UserModel.findOne({ email })
     else throw new Error("Please Provide A Search Query");
 
    // Remove Expired User Stories
@@ -61,9 +61,9 @@ router.get('/users/user', async (req, res) => {
 
    }
 
-    res.send({ user });
+    res.json({ user });
   } catch (e) {
-    res.send({ err: e.message })
+    res.json({ err: e.message })
   }
 })
 
@@ -73,9 +73,9 @@ router.patch('/users/:userId', authenticated, async (req, res) => {
     await UserModel.findByIdAndUpdate(req.params.userId, req.body)
 
     const newUser = await UserModel.findOne({_id: req.params.userId})
-    res.send({ success: newUser })
+    res.json({ success: newUser })
   } catch (e) {
-    res.send({ err: e.message })
+    res.json({ err: e.message })
   }
 })
 
@@ -88,9 +88,9 @@ router.patch('/users/pass/:userId', authenticated, async (req, res) => {
     const user = await UserModel.findByIdAndUpdate(req.params.userId, { password }, { runValidators: true, context: 'query' })
 
     const newUser = await UserModel.findOne({_id: req.params.userId})
-    res.send({ success: newUser })
+    res.json({ success: newUser })
   } catch (e) {
-    res.send({ err: e.message })
+    res.json({ err: e.message })
   }
 })
 
@@ -107,9 +107,9 @@ router.patch('/users/change-picture/:userId', authenticated, multer.single('avat
 
       deleteFile(oldPhotoName);
 
-      res.send({ success: user })
+      res.json({ success: user })
     } catch (e) {
-      res.send({ err: e.message })
+      res.json({ err: e.message })
     }
   }
 )
@@ -142,9 +142,9 @@ router.post('/users/friendRequest/:userId', authenticated, async (req, res) => {
 
     const newUser = await UserModel.findOne({_id: userId});
 
-    res.send({ user: newUser });
+    res.json({ user: newUser });
   } catch (e) {
-    res.send({err: e.message});
+    res.json({err: e.message});
   }
 })
 
@@ -166,9 +166,9 @@ router.post('/users/block/:userId', authenticated, async (req, res) => {
 
     const newUser = await UserModel.findOne({_id: userId});
     
-    res.send({ user: newUser });
+    res.json({ user: newUser });
   } catch (e) {
-    res.send({err: e.message});
+    res.json({err: e.message});
   }
 })
 
@@ -191,9 +191,9 @@ router.post('/users/unblock/:userId', authenticated, async (req, res) => {
 
     const newUser = await UserModel.findOne({_id: userId});
 
-    res.send({ user: newUser });
+    res.json({ user: newUser });
   } catch (e) {
-    res.send({err: e.message});
+    res.json({err: e.message});
   }
 })
 
@@ -221,9 +221,9 @@ router.post('/users/friends/:userId', authenticated, async (req, res) => {
 
     const newUser = await UserModel.findOne({_id: userId});
 
-    res.send({ user: newUser });
+    res.json({ user: newUser });
   } catch (e) {
-    res.send({err: e.message});
+    res.json({err: e.message});
   }
 })
 
@@ -256,9 +256,9 @@ router.delete('/users/friends/:userId', authenticated, async (req, res) => {
 
     const newUser = await UserModel.findOne({_id: userId});
 
-    res.send({ user: newUser });
+    res.json({ user: newUser });
   } catch (e) {
-    res.send({err: e.message});
+    res.json({err: e.message});
   }
 })
 
@@ -266,9 +266,9 @@ router.delete('/users/friends/:userId', authenticated, async (req, res) => {
 router.get('/users', authenticated, async (req, res) => {
   try {
     const Users = await UserModel.find({});
-    res.send({ Users });
+    res.json({ Users });
   } catch (e) {
-    res.send(e.message)
+    res.json(e.message)
   }
 })
 
@@ -291,9 +291,9 @@ router.post('/users/story', authenticated, multer.single('story'), async (req, r
 
       const newUser = await UserModel.findOne({_id: req.query.userId});
 
-      res.send({ success: newUser, story });
+      res.json({ success: newUser, story });
     } catch (e) {
-      res.send({ err: e.message });
+      res.json({ err: e.message });
     }
   }
 )

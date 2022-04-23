@@ -22,7 +22,7 @@ router.post('/chats/:userId', authenticated, async (req, res) => {
     }).populate('messages.user', ['username', 'photo', '_id'])
 
     if (chatInBetween) {
-      return res.send({ chat: chatInBetween, found: true })
+      return res.json({ chat: chatInBetween, found: true })
     }
 
     var friendFound = false
@@ -63,10 +63,10 @@ router.post('/chats/:userId', authenticated, async (req, res) => {
       select: ['username', 'photo', 'activeNow', 'lastActive', '_id']
     }).populate('messages.user', ['username', 'photo', '_id'])
     // Send The Response Back
-    res.send({ chat: newChat })
+    res.json({ chat: newChat })
 
   } catch (e) {
-    res.send({ err: e.message })
+    res.json({ err: e.message })
   }
 })
 
@@ -119,10 +119,10 @@ router.post('/chats/group/:userId', authenticated, multer.single('groupPhoto'), 
     }).populate('messages.user', ['username', 'photo', '_id']);
     
     // Send The Response Back
-    res.send({ result: newChat })
+    res.json({ result: newChat })
 
   } catch (e) {
-    res.send({ err: e.message })
+    res.json({ err: e.message })
   }
 })
 
@@ -136,10 +136,10 @@ router.patch('/chats/group/updatePic', authenticated, multer.single('groupPhoto'
     const oldPhotoName = extractName(req.body.currentImage);
     deleteFile(oldPhotoName);
     // Send The Response Back
-    res.send({ uploadedImg: groupPhoto, group })
+    res.json({ uploadedImg: groupPhoto, group })
 
   } catch (e) {
-    res.send({ err: e.message })
+    res.json({ err: e.message })
   }
 })
 
@@ -154,10 +154,10 @@ router.get('/chats/:userId', authenticated, async (req, res) => {
       select: ['username', 'photo', 'activeNow', 'lastActive', '_id']
     }).populate('messages.user', ['username', 'photo', '_id']).populate('messages.replyTo.user', ['username', '_id']);
 
-    res.send({ chats });
+    res.json({ chats });
     
   } catch (e) {
-    res.send({ err: e.message })
+    res.json({ err: e.message })
   }
 })
 
@@ -165,19 +165,23 @@ router.get('/chats/:userId', authenticated, async (req, res) => {
 // Get a Single Chat Room
 router.get('/chats/chat/:userId', authenticated, async (req, res) => {
   try {
-    const chat_room = await ChatModel.findById(req.query.roomId, { messages: { $slice: -req.query.limit || -30 } } ).populate({
+    const chat_room = await ChatModel.findById(req.query.roomId, { messages: { $slice: -req.query.limit || -30 } } )
+    .populate({
       path: 'usersList',
       model: 'User',
       select: ['username', 'photo', 'activeNow', 'lastActive', '_id']
-    }).populate('messages.user', ['username', 'photo', '_id']).populate('messages.replyTo.user', ['username', '_id']);
+    })
+    .populate('messages.user', ['username', 'photo', '_id'])
+    .populate('messages.replyTo.user', ['username', '_id'])
+    .lean();
 
     var i = chat_room.usersList.findIndex(user => user._id == req.params.userId);
 
     if (i == -1) throw new Error("You are not allowed to show this chat room")
 
-    res.send({ chat_room })
+    res.json({ chat_room })
   } catch (e) {
-    res.send({ err: e.message })
+    res.json({ err: e.message })
   }
 })
 
@@ -185,9 +189,9 @@ router.get('/chats/chat/:userId', authenticated, async (req, res) => {
 router.post('/uploadFileToChat', authenticated, multer.single('file'), async (req, res) => {
   try {
     const fileURL = await uploadToStorage(req.file);
-    res.send({ uploadedFile: fileURL })
+    res.json({ uploadedFile: fileURL })
   } catch (e) {
-    res.send({ err: e.message })
+    res.json({ err: e.message })
   }
 })
 
@@ -196,9 +200,9 @@ router.delete('/deleteFile', authenticated, (req, res) => {
   try {
     const oldFileName = extractName(req.query.src);
     deleteFile(oldFileName);
-    res.send({ success: true })
+    res.json({ success: true })
   } catch (e) {
-    res.send({ err: e.message })
+    res.json({ err: e.message })
   }
 })
 

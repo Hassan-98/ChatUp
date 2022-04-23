@@ -373,9 +373,9 @@ export default () => {
           try {
             const { userID } = jwt.verify(req.cookies.currentUser, process.env.JWT_SECRET);
 
-            const {user} = await this.$axios.$get(`/api/users/user?userId=${userID}`);
+            const { user } = await this.$axios.$get(`/api/users/user?userId=${userID}`);
 
-            const {chats} = await this.$axios.$get(`/api/chats/${userID}`);
+            const { chats } = await this.$axios.$get(`/api/chats/${userID}`);
 
             await this.$axios.$patch(`/api/users/${userID}`, {
               activeNow: true

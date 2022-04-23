@@ -265,9 +265,9 @@ export default {
       this.$store.commit('setUser', user);
 
       this.Toast.fire({
-          toast: true,
-          icon: 'success',
-          title: 'You are now in!'
+        toast: true,
+        icon: 'success',
+        title: 'You are now in!'
       });
 
       this.$router.push("/");
@@ -277,8 +277,10 @@ export default {
 
       try {
         const googleUser = await this.$gAuth.signIn();
+        console.log(googleUser);
 
         const profile = googleUser.getBasicProfile()
+
 
         const userProfile = {
           id: profile.getId(),
@@ -308,7 +310,8 @@ export default {
         });
 
         this.$router.push("/");
-      } catch {
+      } catch (err) {
+        console.log(err);
           e.target.disabled = false;
       }
     }

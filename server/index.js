@@ -12,13 +12,16 @@ const mongoose = require('mongoose')
 // const MongoDBStore = require('connect-mongodb-session')(session)
 const bodyParser = require('body-parser');
 const cookieParser = require("cookie-parser");
+const compression = require('compression');
+const helmet = require('helmet');
+const morgan = require('morgan');
 const cors = require('cors');
 const webpush = require('web-push');
 const DetectLanguage = require('detectlanguage');
 const GROUPCALLS = require("./Models/groupCalls");
 
 // Enable ENV Vars In Development
-if (process.env.NODE_ENV !== 'production') require('dotenv').config();
+require('dotenv').config();
 
 // Cross-Origin Resource Sharing
 var corsOptionsDelegate = function (req, callback) {
@@ -49,11 +52,23 @@ mongoose.connect(process.env.DB_URI, {
   useFindAndModify: true
 });
 
+// Disable etag and x-powered-by
+app.disable("etag").disable("x-powered-by");
 // Setting JSON in Body Of Requests
 app.use(express.json())
-// Form Body Parser
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
+// FormData Body Parser
+app.use(bodyParser.json({ limit: '100mb' }));
+app.use(bodyParser.urlencoded({ 
+  limit: '100mb',
+  extended: true,
+  parameterLimit: 50000 
+}));
+// Req & Res Compressor
+app.use(compression());
+// Helmet Protector
+// app.use(helmet());
+// Set Morgan Logger
+app.use("/api", morgan(':method :url :status - :response-time ms'));
 // Cookie Parser
 app.use(cookieParser());
 
@@ -87,9 +102,9 @@ app.post("/detectLang", async (req, res) => {
   try {
     const detectlanguage = new DetectLanguage(process.env.DETECT_LANGUAGE_KEY);
     const lang = await detectlanguage.detectCode(req.body.msg);
-    res.send(lang);
+    res.json(lang);
   } catch (e) {
-    res.send({err: e.message});
+    res.json({err: e.message});
   }
 })
 
@@ -120,7 +135,7 @@ async function start () {
   const io = require('socket.io')(server);
   const { 
     setLastActive, sendFriendRequestNotification, sendAcceptFriendNotification,
-    sendStoryNotification, getChatInBetween, saveMessage,
+    sendStoryNotification, deleteChatInBetween, saveMessage,
     deleteMessage, getAllChatsId, getAllFriendsId,
     removeUnSeen, editGroup, checkPermissions
   } = require('./Utils/socketFunctions');
@@ -153,9 +168,9 @@ async function start () {
 
     /************** Sending A Message To A Chat **************/
     socket.on('msg', async (msg, endCallMessage) => {
-      const tempId = Math.floor(Math.random() * 1000000000000000);
+      const tempId = Date.now();
 
-      const { allowed, ERROR } = await checkPermissions(msg.userId, msg.chatId);
+      const { allowed, ERROR } = await checkPermissions(msg.userId, msg.chatId, msg.userToId);
 
       if (allowed && !ERROR) {
 
@@ -163,7 +178,7 @@ async function start () {
           const {message, usersList} = await saveMessage(msg, tempId);
 
           return usersList.forEach(user => {
-            io.to(user + 'PERSONAL CHANNEL').emit('recieveFriendMsg', {message, chatId: msg.chatId});
+            io.to(user._id + 'PERSONAL CHANNEL').emit('recieveFriendMsg', {message, chatId: msg.chatId});
           });
         }
 
@@ -174,7 +189,7 @@ async function start () {
         if (err) return socket.emit('setMsgError', {err, tempId, chatID: msg.chatId});
 
         usersList.forEach(user => {
-          if (msg.userId != user) io.to(user + 'PERSONAL CHANNEL').emit('recieveFriendMsg', {message, chatId: msg.chatId});
+          if (msg.userId != user._id) io.to(user._id + 'PERSONAL CHANNEL').emit('recieveFriendMsg', {message, chatId: msg.chatId});
         });
 
         socket.emit('setMsgStatus', {tempId, message, chatID: msg.chatId});
@@ -250,7 +265,7 @@ async function start () {
 
     /************** Remove A Friend **************/
     socket.on("removeContact", async ({contactID}) => {
-      const { _id } = await getChatInBetween(contactID, connectedUser._id);
+      const { _id } = await deleteChatInBetween(contactID, connectedUser._id);
 
       if (_id) {
         socket.emit("removeFromFriends", { contactID, chatID: _id });

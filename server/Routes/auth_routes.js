@@ -1,6 +1,6 @@
 ﻿/* eslint-disable */
 const router = require('express').Router();
-const bcrypt = require('bcrypt');
+const CryptoJS = require("crypto-js");
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const nodemailer = require("nodemailer");
@@ -24,10 +24,10 @@ router.post('/login', notAuthenticated, async (req, res) => {
 
     const { user } = await UserModel.login({email, password}, res);
     
-    res.send({ success: user });
+    res.json({ success: user });
 
   } catch (e) {
-    res.send({err: e.message})
+    res.json({err: e.message})
   }
 })
 
@@ -38,10 +38,10 @@ router.post('/loginWithGoogle', notAuthenticated, async (req, res) => {
 
     const { user } = await UserModel.loginWithGoogle(userProfile, res);
     
-    res.send({ success: user });
+    res.json({ success: user });
 
   } catch (e) {
-    res.send({err: e.message})
+    res.json({err: e.message})
   }
 })
 
@@ -54,9 +54,9 @@ router.post('/signup', notAuthenticated, async (req, res) => {
     
     const user = await newUser.save();
     
-    res.send({ success: user });
+    res.json({ success: user });
   } catch (e) {
-    res.send({err: e.message});
+    res.json({err: e.message});
   }
 })
 
@@ -65,15 +65,15 @@ router.post('/reset', notAuthenticated, async (req, res) => {
   try {
     const {email} = req.body;
 
-    const user = await UserModel.findOne({email});
+    const user = await UserModel.findOne({email}).select({ google_user_id: 1, username: 1 }).lean();
 
-    if (!user) return res.send({err: "This email address is not related to any account"});
+    if (!user) return res.json({err: "This email address is not related to any account"});
 
-    if (user.google_user_id) return res.send({err: "You can't reset password for account registered via Google"});
+    if (user.google_user_id) return res.json({err: "You can't reset password for account registered via Google"});
 
     const Token = await RESET_TOKEN.findOne({userID: mongoose.Types.ObjectId(user._id)});
 
-    if (Token && new Date().getTime() < Token.expiration) return res.send({err: "Reset password email already sent to this email address"});
+    if (Token && new Date().getTime() < Token.expiration) return res.json({err: "Reset password email already sent to this email address"});
 
     if (Token && new Date().getTime() > Token.expiration) await RESET_TOKEN.findByIdAndDelete(Token._id);
 
@@ -95,12 +95,12 @@ router.post('/reset', notAuthenticated, async (req, res) => {
     }
 
     transporter.sendMail(mail_content, (err, info) => {
-      if (err) res.send({err});
-      else res.send({ success: info.response });
+      if (err) res.json({err});
+      else res.json({ success: info.response });
     });
 
   } catch (e) {
-    res.send({err: e.message});
+    res.json({err: e.message});
   }
 });
 
@@ -111,27 +111,27 @@ router.post('/verify-change', notAuthenticated, async (req, res) => {
     
     const Token = await RESET_TOKEN.findOne({token});
 
-    if (!Token || new Date().getTime() > Token.expiration) return res.send({err: "Reset password session expired"});
+    if (!Token || new Date().getTime() > Token.expiration) return res.json({err: "Reset password session expired"});
 
     const { userID } = jwt.verify(token, process.env.JWT_SECRET);
 
     if (!userID) {
       await RESET_TOKEN.findByIdAndDelete(Token._id);
-      return res.send({err: "Reset password session expired"});
+      return res.json({err: "Reset password session expired"});
     }
 
-    const user = await UserModel.findById(userID);
+    const user = await UserModel.findById(userID).select({ password: 1 });
 
-    user.password = await bcrypt.hash(newPassword, 8);
+    user.password = CryptoJS.AES.encrypt(newPassword, process.env.CRYPTO_SECRET).toString();
 
     await user.save();
 
     await RESET_TOKEN.findByIdAndDelete(Token._id);
     
-    res.send({ success: true });
+    res.json({ success: true });
 
   } catch (e) {
-    res.send({err: e.message});
+    res.json({err: e.message});
   }
 });
 
@@ -144,7 +144,7 @@ router.post('/logout', authenticated, async (req, res) => {
     // Redirect To Login Page
     res.redirect("/login");
   } catch (e) {
-    res.send(e)
+    res.json(e)
   }
 })
 

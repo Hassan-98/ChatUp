@@ -185,12 +185,14 @@ export default {
         return this.Toast.fire({ icon: 'error', title: 'Enter a valid email address' });
       }
 
-      const {err} = await this.$axios.$post("/api/auth/reset", {email});
+      const { err } = await this.$axios.$post("/api/auth/reset", {email});
+
+      console.log(err);
 
       if (err) {
         e.target.innerHTML = "Reset";
         e.target.disabled = false;
-        return this.Toast.fire({ icon: 'error', title: err });
+        return this.Toast.fire({ icon: 'error', title: err.message });
       }
 
       e.target.innerHTML = "Reset";

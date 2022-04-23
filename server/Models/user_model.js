@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const CryptoJS = require("crypto-js");
 
 const Schema = mongoose.Schema(
   {
@@ -16,7 +16,7 @@ const Schema = mongoose.Schema(
     email: {
       type: String,
       required: [true, 'Email Address is Missing'],
-      unique: [true, 'A User Already Registered With This Email Address'],
+      unique: true,
       trim: true,
       validate(val) {
         if (!validator.isEmail(val))
@@ -34,9 +34,9 @@ const Schema = mongoose.Schema(
       }
     },
     phone: {
-      type: Number,
+      type: String,
       trim: true,
-      default: 0
+      default: "+20"
     },
     address: {
       type: String,
@@ -110,20 +110,22 @@ const Schema = mongoose.Schema(
 
 // Login A User
 Schema.statics.login = async ({email, password}, res) => {
-  const user = await User.findOne({ email })
+  const user = await User.findOne({ email }).lean();
+
   if (!user) throw Error('Email address or password is incorrect');
   
   if (user.google_user_id) throw Error('This email address is registered via google login only');
 
-  const passwordMacthed = await bcrypt.compare(password, user.password)
-  if (!passwordMacthed) throw Error('Email address or password is incorrect');
+  const decryptedPassword = CryptoJS.AES.decrypt(user.password, process.env.CRYPTO_SECRET).toString(CryptoJS.enc.Utf8);
 
-  var token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  if (decryptedPassword !== password) throw Error('Email address or password is incorrect');
+
+  var token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '365d' });
 
   res.cookie("currentUser", token, {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    expires: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
+    expires: new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000),
   });
 
   return { user }
@@ -131,7 +133,7 @@ Schema.statics.login = async ({email, password}, res) => {
 
 // Login A User With Google
 Schema.statics.loginWithGoogle = async (userProfile, res) => {
-  var user = await User.findOne({ google_user_id: userProfile.id })
+  var user = await User.findOne({ google_user_id: userProfile.id });
 
   if (!user) {
     user = await User.create({
@@ -147,12 +149,12 @@ Schema.statics.loginWithGoogle = async (userProfile, res) => {
 
   await user.save();
 
-  var token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  var token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '365d' });
 
   res.cookie("currentUser", token, {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    expires: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
+    expires: new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000),
   });
 
   return { user }
@@ -161,11 +163,15 @@ Schema.statics.loginWithGoogle = async (userProfile, res) => {
 
 // Check Match Passwords & Hash New Password
 Schema.statics.checkPass = async (Id, newPass, oldPass) => {
-  const user = await User.findById(Id)
-  if (!user) throw Error('Your entered email address or password is incorrect')
-  const passwordMacthed = await bcrypt.compare(oldPass, user.password)
-  if (!passwordMacthed) throw Error('Your entered email address or password is incorrect')
-  const password = await bcrypt.hash(newPass, 8)
+  const user = await User.findById(Id).select({ password: 1 }).lean();
+
+  if (!user) throw Error('Your entered email address or password is incorrect');
+
+  const decryptedPassword = CryptoJS.AES.decrypt(user.password, process.env.CRYPTO_SECRET).toString(CryptoJS.enc.Utf8);
+
+  if (decryptedPassword !== oldPass) throw Error('Your entered email address or password is incorrect');
+
+  const password = CryptoJS.AES.encrypt(newPass, process.env.CRYPTO_SECRET).toString();
 
   return password
 }
