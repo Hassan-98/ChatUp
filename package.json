@@ -39,7 +39,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.4",
     "nodemailer": "^6.7.2",
-    "nuxt": "^2.15.8",
+    "nuxt": "^3.4.3",
     "recorder-js": "^1.0.7",
     "socket.io": "^3.0.0",
     "sweetalert2": "^9.17.2",
